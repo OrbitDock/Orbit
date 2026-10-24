@@ -12,14 +12,16 @@ namespace Orbit;
 public partial class MainWindow : Window
 {
     private const int HotkeyId = 1;
-    private const uint ModAlt = 0x0001;
-    private const uint ModControl = 0x0002;
     private const uint WmHotkey = 0x0312;
     private readonly WndProc _windowProc;
     private readonly Dictionary<string, Window> _openWindows = new();
     private readonly bool _hasSavedPosition;
     private IntPtr _hotkeyWindow;
     private bool _hotkeyRegistered;
+    private IntPtr _keyboardHook;
+    private readonly HookProc _keyboardHookProc;
+    private readonly HashSet<uint> _downKeys = new();
+    private bool _chordTriggered;
     private const string BarAnimationKey = "BarDropAnimationEnabled";
     private bool _barAnimationRunning;
     private bool _entryPrepared;
@@ -31,7 +33,9 @@ public partial class MainWindow : Window
         InitializeComponent();
         _hasSavedPosition = WindowPositionStore.Track(this);
         _windowProc = WindowProcedure;
+        _keyboardHookProc = KeyboardHookProcedure;
         Opened += OnOpened;
+        OrbitHotkey.Changed += UpdateHotkey;
     }
 
     private void OnOpened(object? sender, EventArgs e)
@@ -72,7 +76,58 @@ public partial class MainWindow : Window
             return;
         }
 
-        _hotkeyRegistered = RegisterHotKey(_hotkeyWindow, HotkeyId, ModControl | ModAlt, 0x4F);
+        UpdateHotkey();
+    }
+
+    private void UpdateHotkey()
+    {
+        if (_hotkeyWindow == IntPtr.Zero)
+            return;
+
+        if (_hotkeyRegistered)
+            UnregisterHotKey(_hotkeyWindow, HotkeyId);
+        _hotkeyRegistered = false;
+
+        if (_keyboardHook != IntPtr.Zero)
+            UnhookWindowsHookEx(_keyboardHook);
+        _keyboardHook = SetWindowsHookEx(13, _keyboardHookProc, IntPtr.Zero, 0);
+        _downKeys.Clear();
+        _chordTriggered = false;
+    }
+
+    private IntPtr KeyboardHookProcedure(int code, IntPtr wParam, IntPtr lParam)
+    {
+        if (code >= 0)
+        {
+            var message = wParam.ToInt32();
+            var key = (uint)Marshal.ReadInt32(lParam);
+            if (message is 0x0100 or 0x0104)
+            {
+                _downKeys.Add(key);
+                var binding = OrbitHotkey.Current;
+                var keys = OrbitHotkey.GetKeys(binding);
+                if (!_chordTriggered && keys.All(_downKeys.Contains) && AreModifiersDown(binding.Modifiers))
+                {
+                    _chordTriggered = true;
+                    Avalonia.Threading.Dispatcher.UIThread.Post(ToggleOverlay);
+                }
+            }
+            else if (message is 0x0101 or 0x0105)
+            {
+                _downKeys.Remove(key);
+                _chordTriggered = false;
+            }
+        }
+
+        return CallNextHookEx(_keyboardHook, code, wParam, lParam);
+    }
+
+    private bool AreModifiersDown(uint modifiers)
+    {
+        return ((modifiers & 2) == 0 || _downKeys.Contains(0xA2) || _downKeys.Contains(0xA3))
+            && ((modifiers & 1) == 0 || _downKeys.Contains(0xA4) || _downKeys.Contains(0xA5))
+            && ((modifiers & 4) == 0 || _downKeys.Contains(0xA0) || _downKeys.Contains(0xA1))
+            && ((modifiers & 8) == 0 || _downKeys.Contains(0x5B) || _downKeys.Contains(0x5C));
     }
 
     private IntPtr WindowProcedure(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam)
@@ -214,6 +269,12 @@ public partial class MainWindow : Window
 
     public void DisposeHotkey()
     {
+        OrbitHotkey.Changed -= UpdateHotkey;
+        if (_keyboardHook != IntPtr.Zero)
+        {
+            UnhookWindowsHookEx(_keyboardHook);
+            _keyboardHook = IntPtr.Zero;
+        }
         if (_hotkeyWindow == IntPtr.Zero)
             return;
 
@@ -225,6 +286,7 @@ public partial class MainWindow : Window
     }
 
     private delegate IntPtr WndProc(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam);
+    private delegate IntPtr HookProc(int code, IntPtr wParam, IntPtr lParam);
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     private struct WndClass
@@ -246,6 +308,15 @@ public partial class MainWindow : Window
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool UnregisterHotKey(IntPtr window, int id);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern IntPtr SetWindowsHookEx(int hookId, HookProc callback, IntPtr module, uint threadId);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool UnhookWindowsHookEx(IntPtr hook);
+
+    [DllImport("user32.dll")]
+    private static extern IntPtr CallNextHookEx(IntPtr hook, int code, IntPtr wParam, IntPtr lParam);
 
     [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
     private static extern ushort RegisterClass(ref WndClass windowClass);
