@@ -19,6 +19,8 @@ public sealed class PerformanceOverlayWindow : Window
     private readonly SystemPerformanceMonitor _monitor = new();
     private readonly GameFrameRateMonitor _frameRateMonitor = new();
     private readonly DispatcherTimer _timer = new() { Interval = TimeSpan.FromSeconds(1) };
+    private readonly DispatcherTimer _frameTimer = new() { Interval = TimeSpan.FromMilliseconds(100) };
+    private SystemPerformanceSnapshot _snapshot = new(null, null, null);
     private bool _sampling;
     public static PerformanceOverlayWindow Shared { get; } = new();
     public event EventHandler? OverlayClosed;
@@ -129,21 +131,32 @@ public sealed class PerformanceOverlayWindow : Window
                 PositionTopLeft();
         };
         _timer.Tick += OnTimerTick;
-        Opened += (_, _) => _timer.Start();
+        _frameTimer.Tick += (_, _) => UpdateStats();
+        Opened += (_, _) =>
+        {
+            _timer.Start();
+            _frameTimer.Start();
+        };
         Deactivated += (_, _) => KeepOnTop();
         Orbit.WindowPositionStore.Track(this);
     }
 
     public void Update(SystemPerformanceSnapshot snapshot)
     {
-        if (snapshot.Memory is { TotalBytes: > 0 } memory)
+        _snapshot = snapshot;
+        UpdateStats();
+    }
+
+    private void UpdateStats()
+    {
+        if (_snapshot.Memory is { TotalBytes: > 0 } memory)
         {
             var used = memory.UsedBytes * 100d / memory.TotalBytes;
-            _stats.Text = $"FPS {FormatFps(_frameRateMonitor.ReadFramesPerSecond())}  CPU {Format(snapshot.CpuUsage)}\nGPU {Format(snapshot.GpuUsage)}  MEM {used:0}% ({FormatBytes(memory.UsedBytes)}/{FormatBytes(memory.TotalBytes)})";
+            _stats.Text = $"FPS {FormatFps(_frameRateMonitor.ReadFramesPerSecond())}  CPU {Format(_snapshot.CpuUsage)}\nGPU {Format(_snapshot.GpuUsage)}  MEM {used:0}% ({FormatBytes(memory.UsedBytes)}/{FormatBytes(memory.TotalBytes)})";
         }
         else
         {
-            _stats.Text = $"FPS {FormatFps(_frameRateMonitor.ReadFramesPerSecond())}  CPU {Format(snapshot.CpuUsage)}\nGPU {Format(snapshot.GpuUsage)}  MEM N/A";
+            _stats.Text = $"FPS {FormatFps(_frameRateMonitor.ReadFramesPerSecond())}  CPU {Format(_snapshot.CpuUsage)}\nGPU {Format(_snapshot.GpuUsage)}  MEM N/A";
         }
         _stats.FontSize = 11;
         _stats.FontWeight = FontWeight.Medium;
