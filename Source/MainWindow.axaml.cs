@@ -1,7 +1,9 @@
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Platform;
 using Orbit.Controls;
 
@@ -18,6 +20,11 @@ public partial class MainWindow : Window
     private readonly bool _hasSavedPosition;
     private IntPtr _hotkeyWindow;
     private bool _hotkeyRegistered;
+    private const string BarAnimationKey = "BarDropAnimationEnabled";
+    private bool _barAnimationRunning;
+    private bool _entryPrepared;
+    private PixelPoint _animationOrigin;
+    private PixelPoint _animationTarget;
 
     public MainWindow()
     {
@@ -29,6 +36,12 @@ public partial class MainWindow : Window
 
     private void OnOpened(object? sender, EventArgs e)
     {
+        if (_entryPrepared)
+        {
+            _entryPrepared = false;
+            return;
+        }
+
         var screen = Screens.Primary;
         if (!_hasSavedPosition && screen is not null)
         {
@@ -37,6 +50,9 @@ public partial class MainWindow : Window
                 screen.WorkingArea.X + (int)((screen.WorkingArea.Width - Width * scale) / 2),
                 screen.WorkingArea.Y + (int)(24 * scale));
         }
+
+        PrepareBarEntry();
+        _ = AnimateBarAsync(true);
 
         if (!OperatingSystem.IsWindows())
             return;
@@ -70,19 +86,77 @@ public partial class MainWindow : Window
         return DefWindowProc(hwnd, message, wParam, lParam);
     }
 
-    private void ToggleOverlay()
+    private async void ToggleOverlay()
     {
+        if (_barAnimationRunning)
+            return;
+
         if (IsVisible)
         {
+            await AnimateBarAsync(false);
             Hide();
+            Position = _animationOrigin;
+            WindowPositionStore.SetTrackingPaused(this, false);
             _openWindows.Values.LastOrDefault(window => window.IsVisible)?.Activate();
             return;
         }
 
+        PrepareBarEntry();
         Show();
         Topmost = false;
         Topmost = true;
         Activate();
+        await AnimateBarAsync(true);
+    }
+
+    private async Task AnimateBarAsync(bool entering)
+    {
+        if (!OrbitSettings.GetBool(BarAnimationKey, true))
+        {
+            if (entering)
+                Position = _animationOrigin;
+            return;
+        }
+
+        _barAnimationRunning = true;
+        var target = _animationTarget;
+        var stopwatch = Stopwatch.StartNew();
+        const double duration = 320;
+        while (stopwatch.Elapsed.TotalMilliseconds < duration && IsVisible)
+        {
+            var progress = Math.Clamp(stopwatch.Elapsed.TotalMilliseconds / duration, 0, 1);
+            var eased = 1 - Math.Pow(1 - progress, 3);
+            var startY = entering ? target.Y : _animationOrigin.Y;
+            var endY = entering ? _animationOrigin.Y : target.Y;
+            Position = new PixelPoint(_animationOrigin.X, (int)(startY + (endY - startY) * eased));
+            await Task.Delay(16);
+        }
+
+        Position = entering ? _animationOrigin : target;
+        _barAnimationRunning = false;
+    }
+
+    private void PrepareBarEntry()
+    {
+        _entryPrepared = true;
+        _animationOrigin = Position;
+        if (!OrbitSettings.GetBool(BarAnimationKey, true))
+            return;
+
+        WindowPositionStore.SetTrackingPaused(this, true);
+        _animationTarget = GetAboveScreenPosition(_animationOrigin);
+        Position = _animationTarget;
+    }
+
+    private PixelPoint GetAboveScreenPosition(PixelPoint origin)
+    {
+        var screen = Screens.ScreenFromWindow(this) ?? Screens.Primary;
+        if (screen is null)
+            return new PixelPoint(origin.X, -((int)(Height * 2) + 16));
+
+        var scale = screen.Scaling;
+        var height = (int)(Height * scale);
+        return new PixelPoint(origin.X, screen.Bounds.Y - height - (int)(16 * scale));
     }
 
     private void OnClipClick(object? sender, RoutedEventArgs e) => ToggleWindow("video-clipping", () => new InfoWindow("Video clipping", "This widget is not active yet."));

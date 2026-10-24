@@ -7,14 +7,25 @@ namespace Orbit;
 
 public sealed class SettingsWindow : SettingsWindowBase
 {
+    private const string BarAnimationKey = "BarDropAnimationEnabled";
+
     public SettingsWindow()
     {
-        SetContent("Settings", new StackPanel
+        var barAnimationToggle = new CheckBox
         {
-            Spacing = 16,
+            Content = "Animate the Orbit bar when it opens",
+            IsChecked = OrbitSettings.GetBool(BarAnimationKey, true),
+            FontSize = 13
+        };
+        barAnimationToggle.IsCheckedChanged += (_, _) => OrbitSettings.SetBool(BarAnimationKey, barAnimationToggle.IsChecked == true);
+
+        var settings = new StackPanel
+        {
+            Spacing = 14,
             Children =
             {
-                new TextBlock { Text = "Shortcut", FontSize = 17, FontWeight = FontWeight.SemiBold },
+                new TextBlock { Text = "General", FontSize = 15, FontWeight = FontWeight.SemiBold },
+                new TextBlock { Text = "Shortcut", FontSize = 13, FontWeight = FontWeight.Medium },
                 new Border
                 {
                     CornerRadius = new Avalonia.CornerRadius(10),
@@ -58,8 +69,24 @@ public sealed class SettingsWindow : SettingsWindowBase
                         new TextBlock { Text = "Widgets", FontSize = 14, FontWeight = FontWeight.Medium },
                         new TextBlock { Text = "Widget controls are not active yet.", FontSize = 12, Foreground = OrbitTheme.Muted }
                     }
+                },
+                new Border { Height = 1, Background = OrbitTheme.Line },
+                new TextBlock { Text = "Performance", FontSize = 15, FontWeight = FontWeight.SemiBold },
+                barAnimationToggle,
+                new TextBlock
+                {
+                    Text = "Play a short drop-down animation when the Orbit bar opens.",
+                    FontSize = 12,
+                    Foreground = OrbitTheme.Muted,
+                    Margin = new Avalonia.Thickness(24, -10, 0, 0)
                 }
             }
+        };
+
+        SetContent("Settings", new ScrollViewer
+        {
+            VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
+            Content = settings
         });
     }
 

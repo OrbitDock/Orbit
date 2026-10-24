@@ -13,6 +13,7 @@ public static class WindowPositionStore
         "window-positions.json");
     private static readonly JsonSerializerOptions JsonOptions = new() { WriteIndented = true };
     private static readonly object Sync = new();
+    private static readonly HashSet<Window> PausedWindows = new();
 
     public static bool Track(Window window)
     {
@@ -20,10 +21,26 @@ public static class WindowPositionStore
         var restored = Restore(window, key);
         window.PositionChanged += (_, _) =>
         {
+            lock (Sync)
+            {
+                if (PausedWindows.Contains(window))
+                    return;
+            }
             Save(window, key);
         };
         window.Closed += (_, _) => Save(window, key);
         return restored;
+    }
+
+    public static void SetTrackingPaused(Window window, bool paused)
+    {
+        lock (Sync)
+        {
+            if (paused)
+                PausedWindows.Add(window);
+            else
+                PausedWindows.Remove(window);
+        }
     }
 
     private static bool Restore(Window window, string key)
