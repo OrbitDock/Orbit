@@ -10,6 +10,7 @@ public partial class SettingsWindowBase : Window
     public SettingsWindowBase()
     {
         AvaloniaXamlLoader.Load(this);
+        WindowPositionStore.Track(this);
     }
 
     protected void SetContent(string title, Control content)

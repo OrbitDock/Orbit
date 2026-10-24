@@ -14,12 +14,14 @@ public partial class MainWindow : Window
     private const uint WmHotkey = 0x0312;
     private readonly WndProc _windowProc;
     private readonly Dictionary<string, Window> _openWindows = new();
+    private readonly bool _hasSavedPosition;
     private IntPtr _hotkeyWindow;
     private bool _hotkeyRegistered;
 
     public MainWindow()
     {
         InitializeComponent();
+        _hasSavedPosition = WindowPositionStore.Track(this);
         _windowProc = WindowProcedure;
         Opened += OnOpened;
     }
@@ -27,7 +29,7 @@ public partial class MainWindow : Window
     private void OnOpened(object? sender, EventArgs e)
     {
         var screen = Screens.Primary;
-        if (screen is not null)
+        if (!_hasSavedPosition && screen is not null)
         {
             var scale = screen.Scaling;
             Position = new PixelPoint(

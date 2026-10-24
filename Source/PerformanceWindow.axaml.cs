@@ -14,6 +14,9 @@ public sealed class PerformanceWindow : SettingsWindowBase
     private readonly MetricView _cpu;
     private readonly MetricView _memory;
     private readonly MetricView _gpu;
+    private readonly CheckBox _overlayToggle;
+    private readonly CheckBox _overlayLockToggle;
+    private readonly PerformanceOverlayWindow _overlay = PerformanceOverlayWindow.Shared;
     private bool _sampling;
 
     public PerformanceWindow()
@@ -21,6 +24,22 @@ public sealed class PerformanceWindow : SettingsWindowBase
         _cpu = CreateMetric("CPU", "Overall processor load");
         _memory = CreateMetric("Memory", "Physical memory in use");
         _gpu = CreateMetric("GPU", "Highest active engine");
+        _overlayToggle = new CheckBox
+        {
+            Content = "In-Game Performance Overlay",
+            IsChecked = PerformanceOverlayWindow.OverlayEnabled,
+            FontSize = 13,
+            VerticalAlignment = VerticalAlignment.Center
+        };
+        _overlayLockToggle = new CheckBox
+        {
+            Content = "Lock overlay position",
+            IsChecked = PerformanceOverlayWindow.IsLocked,
+            FontSize = 13,
+            VerticalAlignment = VerticalAlignment.Center,
+            Margin = new Avalonia.Thickness(24, 8, 0, 0),
+            IsEnabled = PerformanceOverlayWindow.OverlayEnabled
+        };
 
         var metrics = new StackPanel
         {
@@ -32,6 +51,9 @@ public sealed class PerformanceWindow : SettingsWindowBase
                 _memory.Root,
                 CreateDivider(),
                 _gpu.Root,
+                CreateDivider(),
+                _overlayToggle,
+                _overlayLockToggle,
                 new TextBlock
                 {
                     Text = "System-wide readings refresh every second.",
@@ -43,15 +65,23 @@ public sealed class PerformanceWindow : SettingsWindowBase
         };
 
         SetContent("PC performance", metrics);
+        _overlayToggle.IsCheckedChanged += OnOverlayToggleChanged;
+        _overlayLockToggle.IsCheckedChanged += (_, _) => PerformanceOverlayWindow.IsLocked = _overlayLockToggle.IsChecked == true;
+        _overlay.OverlayClosed += OnOverlayClosed;
         _timer.Tick += OnTimerTick;
         Opened += OnOpened;
-        Closed += OnClosed;
+        Closed += (_, _) => _timer.Stop();
+        Opened += (_, _) =>
+        {
+            if (PerformanceOverlayWindow.OverlayEnabled)
+                _overlay.Show();
+        };
     }
 
-    private async void OnOpened(object? sender, EventArgs e)
+    private void OnOpened(object? sender, EventArgs e)
     {
         _timer.Start();
-        await RefreshMetricsAsync();
+        _ = RefreshMetricsAsync();
     }
 
     private async void OnTimerTick(object? sender, EventArgs e) => await RefreshMetricsAsync();
@@ -69,7 +99,6 @@ public sealed class PerformanceWindow : SettingsWindowBase
                 return;
 
             UpdateMetric(_cpu, snapshot.CpuUsage, "Overall processor load");
-
             if (snapshot.Memory is { TotalBytes: > 0 } memory)
             {
                 var usage = memory.UsedBytes * 100d / memory.TotalBytes;
@@ -94,10 +123,25 @@ public sealed class PerformanceWindow : SettingsWindowBase
         }
     }
 
-    private void OnClosed(object? sender, EventArgs e)
+    private void OnOverlayToggleChanged(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        _timer.Stop();
-        _monitor.Dispose();
+        PerformanceOverlayWindow.OverlayEnabled = _overlayToggle.IsChecked == true;
+        _overlayLockToggle.IsEnabled = PerformanceOverlayWindow.OverlayEnabled;
+        if (PerformanceOverlayWindow.OverlayEnabled)
+        {
+            _overlay.Show();
+            _overlay.Activate();
+        }
+        else
+        {
+            _overlay.Hide();
+        }
+    }
+
+    private void OnOverlayClosed(object? sender, EventArgs e)
+    {
+        _overlayToggle.IsChecked = false;
+        _overlayLockToggle.IsEnabled = false;
     }
 
     private static MetricView CreateMetric(string title, string detail)
