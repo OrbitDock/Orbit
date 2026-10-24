@@ -1,0 +1,10 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Orbit
+Comment=Gaming overlay
+Exec=Orbit
+Icon=orbit_logo_square
+Terminal=false
+Categories=Game;Utility;
+StartupWMClass=Orbit
