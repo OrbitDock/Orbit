@@ -16,7 +16,7 @@ Orbit is a unified gaming overlay, similar to a game bar, for many uses. The goa
 
 ---
 
-**Feautures:**
+**Features:**
 
 - N / A
 
