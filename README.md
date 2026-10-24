@@ -41,6 +41,8 @@ Orbit is a unified gaming overlay, similar to a game bar, for many uses. The goa
 - Video Clipping
 - Game Screenshots (Organized, any game)
 - Discord Rich Presence
+- Widget Marketplace
+- Music App Control Widget
 
 ---
 
