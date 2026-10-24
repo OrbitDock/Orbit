@@ -10,6 +10,7 @@ public partial class SettingsWindowBase : Window
     public SettingsWindowBase()
     {
         AvaloniaXamlLoader.Load(this);
+        ShowInTaskbar = false;
         WindowPositionStore.Track(this);
     }
 
