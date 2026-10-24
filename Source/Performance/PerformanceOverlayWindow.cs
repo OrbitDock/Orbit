@@ -130,6 +130,7 @@ public sealed class PerformanceOverlayWindow : Window
         };
         _timer.Tick += OnTimerTick;
         Opened += (_, _) => _timer.Start();
+        Deactivated += (_, _) => KeepOnTop();
         Orbit.WindowPositionStore.Track(this);
     }
 
@@ -154,6 +155,7 @@ public sealed class PerformanceOverlayWindow : Window
         if (_sampling || !OverlayEnabled)
             return;
 
+        KeepOnTop();
         _sampling = true;
         try
         {
@@ -168,6 +170,14 @@ public sealed class PerformanceOverlayWindow : Window
         {
             _sampling = false;
         }
+    }
+
+    private void KeepOnTop()
+    {
+        if (!OperatingSystem.IsWindows() || !IsVisible || TryGetPlatformHandle() is not { } handle)
+            return;
+
+        SetWindowPos(handle.Handle, new IntPtr(-1), 0, 0, 0, 0, 0x0001 | 0x0002 | 0x0010);
     }
 
     private void PositionTopLeft()
@@ -233,4 +243,7 @@ public sealed class PerformanceOverlayWindow : Window
     private static string Format(double? value) => value.HasValue ? $"{Math.Clamp(value.Value, 0, 100):0}%" : "N/A";
     private static string FormatFps(double? value) => value.HasValue ? $"{value.Value:0}" : "N/A";
     private static string FormatBytes(ulong bytes) => $"{bytes / 1024d / 1024d / 1024d:0.0} GB";
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool SetWindowPos(IntPtr window, IntPtr insertAfter, int x, int y, int width, int height, uint flags);
 }

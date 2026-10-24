@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Runtime.InteropServices;
 using PresentMonFps;
 
@@ -6,72 +5,106 @@ namespace Orbit.Performance;
 
 public sealed class GameFrameRateMonitor : IDisposable
 {
-    private static readonly object SessionLock = new();
-    private static GameFrameRateMonitor? _active;
-    private static CancellationTokenSource? _cancellation;
-    private static double? _currentFps;
+    private readonly object _sync = new();
+    private CancellationTokenSource? _cancellation;
+    private Task? _captureTask;
     private uint _targetProcessId;
+    private double? _fps;
     private bool _disposed;
 
-    public GameFrameRateMonitor()
-    {
-        if (!OperatingSystem.IsWindows())
-            return;
-
-        lock (SessionLock)
-            _active = this;
-    }
+    public GameFrameRateMonitor() { }
 
     public double? ReadFramesPerSecond()
     {
-        lock (SessionLock)
+        lock (_sync)
         {
             if (_disposed)
                 return null;
 
             var processId = GetForegroundProcessId();
-            if (processId != 0 && processId != Environment.ProcessId && processId != _targetProcessId)
+            if (processId == 0 || processId == Environment.ProcessId)
             {
-                StopSession();
-                _targetProcessId = processId;
-                _currentFps = null;
-                _cancellation = new CancellationTokenSource();
-                var request = new FpsRequest(processId) { PeriodMillisecond = 500 };
-                _ = Task.Run(() => FpsInspector.StartForeverAsync(request, OnFpsUpdated, _cancellation.Token));
+                if (_targetProcessId != 0)
+                {
+                    StopCapture();
+                    _targetProcessId = 0;
+                    _fps = null;
+                }
+                return null;
             }
 
-            return _currentFps;
+            if (processId != _targetProcessId)
+            {
+                var previousCapture = StopCapture();
+                _targetProcessId = processId;
+                _fps = null;
+                _cancellation = new CancellationTokenSource();
+                var target = processId;
+                var cancellation = _cancellation;
+                _captureTask = CaptureAsync(target, cancellation, previousCapture);
+            }
+
+            return _fps;
         }
     }
 
     public void Dispose()
     {
-        lock (SessionLock)
+        lock (_sync)
         {
             if (_disposed)
                 return;
 
             _disposed = true;
-            if (ReferenceEquals(_active, this))
-            {
-                StopSession();
-                _active = null;
-            }
+            StopCapture();
         }
     }
 
-    private static void OnFpsUpdated(FpsResult result)
+    private async Task CaptureAsync(uint processId, CancellationTokenSource cancellation, Task? previousCapture)
     {
-        lock (SessionLock)
-            _currentFps = result.Fps;
+        try
+        {
+            if (previousCapture is not null)
+                await previousCapture;
+            if (cancellation.IsCancellationRequested)
+                return;
+
+            var request = new FpsRequest(processId) { PeriodMillisecond = 250 };
+            await FpsInspector.StartForeverAsync(request, result =>
+            {
+                lock (_sync)
+                {
+                    if (!_disposed && processId == _targetProcessId)
+                        _fps = result.Fps;
+                }
+            }, cancellation.Token);
+        }
+        catch (Exception)
+        {
+        }
+        finally
+        {
+            lock (_sync)
+            {
+                if (ReferenceEquals(_cancellation, cancellation))
+                {
+                    _cancellation = null;
+                    _captureTask = null;
+                    _targetProcessId = 0;
+                    _fps = null;
+                }
+            }
+            cancellation.Dispose();
+        }
     }
 
-    private static void StopSession()
+    private Task? StopCapture()
     {
+        var previousCapture = _captureTask;
         _cancellation?.Cancel();
-        _cancellation?.Dispose();
         _cancellation = null;
-        try { FpsInspector.StopTraceSession(); } catch (Exception) { }
+        _captureTask = null;
+        return previousCapture;
     }
 
     private static uint GetForegroundProcessId()
