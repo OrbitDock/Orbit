@@ -4,10 +4,11 @@ namespace Orbit.Controls;
 
 public static class OrbitTheme
 {
-    public static readonly IBrush Surface = Brush.Parse("#20232A");
-    public static readonly IBrush Raised = Brush.Parse("#272B34");
-    public static readonly IBrush Line = Brush.Parse("#343A46");
-    public static readonly IBrush Text = Brush.Parse("#F0F3F8");
-    public static readonly IBrush Muted = Brush.Parse("#A6AFBF");
+    public static readonly IBrush Accent = Brush.Parse("#2864F0");
+    public static readonly IBrush Surface = Brush.Parse("#292929");
+    public static readonly IBrush Raised = Brush.Parse("#303030");
+    public static readonly IBrush Line = Brush.Parse("#3D3D3D");
+    public static readonly IBrush Text = Brush.Parse("#F0F0F0");
+    public static readonly IBrush Muted = Brush.Parse("#A6A6A6");
     public static readonly IBrush Icon = Brush.Parse("#A9B9DD");
 }

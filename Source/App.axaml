@@ -5,11 +5,11 @@
   <Application.Resources>
     <ResourceDictionary>
       <SolidColorBrush x:Key="AccentBrush" Color="#2864F0" />
-      <SolidColorBrush x:Key="CanvasBrush" Color="#17191E" />
-      <SolidColorBrush x:Key="RaisedBrush" Color="#272B34" />
-      <SolidColorBrush x:Key="LineBrush" Color="#343A46" />
-      <SolidColorBrush x:Key="TextBrush" Color="#F0F3F8" />
-      <SolidColorBrush x:Key="MutedBrush" Color="#A6AFBF" />
+      <SolidColorBrush x:Key="CanvasBrush" Color="#202020" />
+      <SolidColorBrush x:Key="RaisedBrush" Color="#303030" />
+      <SolidColorBrush x:Key="LineBrush" Color="#3D3D3D" />
+      <SolidColorBrush x:Key="TextBrush" Color="#F0F0F0" />
+      <SolidColorBrush x:Key="MutedBrush" Color="#A6A6A6" />
       <SolidColorBrush x:Key="IconBrush" Color="#A9B9DD" />
     </ResourceDictionary>
   </Application.Resources>
@@ -33,7 +33,7 @@
       <Setter Property="Background" Value="{StaticResource RaisedBrush}" />
     </Style>
     <Style Selector="Button:pressed">
-      <Setter Property="Background" Value="#303642" />
+      <Setter Property="Background" Value="#383838" />
     </Style>
     <Style Selector="Button:focus-visible">
       <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
