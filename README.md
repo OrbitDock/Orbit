@@ -1,6 +1,6 @@
 <div align="center">
 
-<img width="512" height="256" alt="orbit_logo" src="https://github.com/user-attachments/assets/7c27c0c6-f4de-4e36-80a5-edbad734ae38" />
+<img width="512" height="256" alt="orbit_logo" src="https://github.com/user-attachments/assets/3db59193-ce81-43a8-b88b-6ac5ca592feb" />
 
 ---
 
