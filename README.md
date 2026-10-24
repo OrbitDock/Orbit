@@ -30,6 +30,7 @@ Orbit is a unified gaming overlay, similar to a game bar, for many uses. The goa
 
 - Drop down bar (Ctrl + Alt + O)
 - Linux & Windows support
+- Performance Widget
 
 **Planned Features:**
 
