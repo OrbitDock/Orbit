@@ -17,11 +17,11 @@ public sealed class OrbitIcon : Avalonia.Controls.Shapes.Path
 {
     private static readonly IReadOnlyDictionary<OrbitIconKind, string> GeometryByKind = new Dictionary<OrbitIconKind, string>
     {
-        [OrbitIconKind.Clip] = "M3 6 H14 V18 H3 Z M14 9 L21 6 V18 L14 15 Z M6 9 L10 12 L6 15 Z",
-        [OrbitIconKind.Screenshot] = "M3 7 H21 V19 H3 Z M7 7 L9 4 H15 L17 7 M6 16 L10 12 L13 15 L16 11 L19 16",
-        [OrbitIconKind.Performance] = "M3 18 V6 M3 18 H21 M6 14 L10 10 L13 13 L19 6",
-        [OrbitIconKind.Add] = "M12 4 V20 M4 12 H20",
-        [OrbitIconKind.Settings] = "M4 6 H10 M14 6 H20 M4 12 H6 M10 12 H20 M4 18 H14 M18 18 H20 M12 4 V8 M8 10 V14 M16 16 V20",
+        [OrbitIconKind.Clip] = "M4 4 H14 A2 2 0 0 1 16 6 V18 A2 2 0 0 1 14 20 H4 A2 2 0 0 1 2 18 V6 A2 2 0 0 1 4 4 Z M16 9 L22 6 V18 L16 15 Z",
+        [OrbitIconKind.Screenshot] = "M3 7 H7 L9 4 H15 L17 7 H21 V19 H3 Z M12 10 A3.5 3.5 0 1 0 12 17 A3.5 3.5 0 1 0 12 10 Z",
+        [OrbitIconKind.Performance] = "M3 4 V20 H21 M6 15 L10 11 L13 14 L19 7 M16 7 H19 V10",
+        [OrbitIconKind.Add] = "M12 5 V19 M5 12 H19",
+        [OrbitIconKind.Settings] = "M4 6 H20 M4 12 H20 M4 18 H20 M9 4 V8 M15 10 V14 M8 16 V20",
         [OrbitIconKind.Close] = "M6 6 L18 18 M18 6 L6 18"
     };
 
@@ -29,7 +29,7 @@ public sealed class OrbitIcon : Avalonia.Controls.Shapes.Path
 
     public OrbitIcon()
     {
-        StrokeThickness = 1.8;
+        StrokeThickness = 1.7;
         StrokeLineCap = PenLineCap.Round;
         StrokeJoin = PenLineJoin.Round;
         Stretch = Stretch.Uniform;

@@ -18,9 +18,9 @@
     <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto" Margin="17,0,16,0">
       <Image Source="avares://Orbit/Assets/orbit_logo.png" Width="108" Height="38" Stretch="Uniform" VerticalAlignment="Center" />
 
-      <Border Grid.Column="1" Width="1" Height="26" Background="{StaticResource LineBrush}" Margin="20,0" />
+      <Border Grid.Column="1" Width="1" Height="26" Background="{StaticResource LineBrush}" Margin="16,0" />
 
-      <Grid Grid.Column="2" ColumnDefinitions="40,40,40" Height="40" VerticalAlignment="Center" HorizontalAlignment="Center">
+      <Grid Grid.Column="2" ColumnDefinitions="40,40,40" Height="40" VerticalAlignment="Center" HorizontalAlignment="Left">
         <Button Grid.Column="0" Classes="overlay-icon-button" x:Name="ClipButton" ToolTip.Tip="Video clipping" Click="OnClipClick" AutomationProperties.Name="Video clipping">
           <Grid Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
             <icons:OrbitIcon Kind="Clip" Width="20" Height="20" Stroke="{StaticResource IconBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -43,12 +43,12 @@
       <Grid Grid.Column="4" ColumnDefinitions="40,40" Height="40" VerticalAlignment="Center">
         <Button Grid.Column="0" Classes="overlay-icon-button primary" ToolTip.Tip="New widgets" Click="OnWidgetsClick" AutomationProperties.Name="New widgets">
           <Grid Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <icons:OrbitIcon Kind="Add" Width="20" Height="20" Stroke="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <icons:OrbitIcon Kind="Add" Width="18" Height="18" Stroke="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Grid>
         </Button>
         <Button Grid.Column="1" Classes="overlay-icon-button" ToolTip.Tip="Settings" Click="OnSettingsClick" AutomationProperties.Name="Settings">
           <Grid Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <icons:OrbitIcon Kind="Settings" Width="20" Height="20" Stroke="{StaticResource IconBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <icons:OrbitIcon Kind="Settings" Width="18" Height="18" Stroke="{StaticResource IconBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Grid>
         </Button>
       </Grid>
