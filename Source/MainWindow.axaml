@@ -20,28 +20,38 @@
 
       <Border Grid.Column="1" Width="1" Height="26" Background="{StaticResource LineBrush}" Margin="20,0" />
 
-      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="3" VerticalAlignment="Center">
-        <Button x:Name="ClipButton" Width="40" Height="40" ToolTip.Tip="Video clipping" Click="OnClipClick" AutomationProperties.Name="Video clipping">
-          <icons:OrbitIcon Kind="Clip" Width="20" Height="20" Stroke="{StaticResource IconBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+      <Grid Grid.Column="2" ColumnDefinitions="40,40,40" Height="40" VerticalAlignment="Center" HorizontalAlignment="Center">
+        <Button Grid.Column="0" Classes="overlay-icon-button" x:Name="ClipButton" ToolTip.Tip="Video clipping" Click="OnClipClick" AutomationProperties.Name="Video clipping">
+          <Grid Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <icons:OrbitIcon Kind="Clip" Width="20" Height="20" Stroke="{StaticResource IconBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Grid>
         </Button>
-        <Button x:Name="ScreenshotButton" Width="40" Height="40" ToolTip.Tip="Screenshots" Click="OnScreenshotClick" AutomationProperties.Name="Screenshots">
-          <icons:OrbitIcon Kind="Screenshot" Width="20" Height="20" Stroke="{StaticResource IconBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+        <Button Grid.Column="1" Classes="overlay-icon-button" x:Name="ScreenshotButton" ToolTip.Tip="Screenshots" Click="OnScreenshotClick" AutomationProperties.Name="Screenshots">
+          <Grid Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <icons:OrbitIcon Kind="Screenshot" Width="20" Height="20" Stroke="{StaticResource IconBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Grid>
         </Button>
-        <Button x:Name="PerformanceButton" Width="40" Height="40" ToolTip.Tip="PC performance" Click="OnPerformanceClick" AutomationProperties.Name="PC performance">
-          <icons:OrbitIcon Kind="Performance" Width="20" Height="20" Stroke="{StaticResource IconBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" />
+        <Button Grid.Column="2" Classes="overlay-icon-button" x:Name="PerformanceButton" ToolTip.Tip="PC performance" Click="OnPerformanceClick" AutomationProperties.Name="PC performance">
+          <Grid Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <icons:OrbitIcon Kind="Performance" Width="20" Height="20" Stroke="{StaticResource IconBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Grid>
         </Button>
-      </StackPanel>
+      </Grid>
 
       <Border Grid.Column="3" Width="1" Height="26" Background="{StaticResource LineBrush}" Margin="18,0" />
 
-      <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-        <Button Classes="primary" Width="40" Height="40" ToolTip.Tip="New widgets" Click="OnWidgetsClick" AutomationProperties.Name="New widgets">
-          <icons:OrbitIcon Kind="Add" Width="18" Height="18" Stroke="White" />
+      <Grid Grid.Column="4" ColumnDefinitions="40,40" Height="40" VerticalAlignment="Center">
+        <Button Grid.Column="0" Classes="overlay-icon-button primary" ToolTip.Tip="New widgets" Click="OnWidgetsClick" AutomationProperties.Name="New widgets">
+          <Grid Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <icons:OrbitIcon Kind="Add" Width="20" Height="20" Stroke="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Grid>
         </Button>
-        <Button Width="40" Height="40" ToolTip.Tip="Settings" Click="OnSettingsClick" AutomationProperties.Name="Settings">
-          <icons:OrbitIcon Kind="Settings" Width="18" Height="18" Stroke="{StaticResource IconBrush}" />
+        <Button Grid.Column="1" Classes="overlay-icon-button" ToolTip.Tip="Settings" Click="OnSettingsClick" AutomationProperties.Name="Settings">
+          <Grid Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <icons:OrbitIcon Kind="Settings" Width="20" Height="20" Stroke="{StaticResource IconBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Grid>
         </Button>
-      </StackPanel>
+      </Grid>
     </Grid>
   </Grid>
 </Window>

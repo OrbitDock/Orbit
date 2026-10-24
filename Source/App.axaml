@@ -29,6 +29,12 @@
       <Setter Property="CornerRadius" Value="9" />
       <Setter Property="Cursor" Value="Hand" />
     </Style>
+    <Style Selector="Button.overlay-icon-button">
+      <Setter Property="Width" Value="40" />
+      <Setter Property="Height" Value="40" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
     <Style Selector="Button:pointerover">
       <Setter Property="Background" Value="{StaticResource RaisedBrush}" />
     </Style>
