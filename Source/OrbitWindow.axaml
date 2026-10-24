@@ -13,9 +13,6 @@
         WindowStartupLocation="CenterScreen">
   <Grid Margin="5">
     <Border CornerRadius="18" BorderThickness="1" BorderBrush="{StaticResource LineBrush}" Background="{StaticResource CanvasBrush}" IsHitTestVisible="False">
-      <Border.Effect>
-        <DropShadowEffect BlurRadius="12" Color="#99000000" Opacity="0.7" OffsetX="0" OffsetY="5" />
-      </Border.Effect>
     </Border>
     <Grid RowDefinitions="58,*" Margin="18,12,18,16">
       <Grid ColumnDefinitions="*,Auto" RowDefinitions="*,Auto">

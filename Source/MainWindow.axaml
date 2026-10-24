@@ -14,9 +14,6 @@
         WindowStartupLocation="CenterScreen">
   <Grid Margin="5">
     <Border CornerRadius="18" BorderThickness="1" BorderBrush="{StaticResource LineBrush}" Background="{StaticResource CanvasBrush}" IsHitTestVisible="False">
-      <Border.Effect>
-        <DropShadowEffect BlurRadius="18" Color="#99000000" Opacity="0.55" OffsetX="0" OffsetY="7" />
-      </Border.Effect>
     </Border>
     <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto" Margin="17,0,16,0">
       <Image Source="avares://Orbit/Assets/orbit_logo.png" Width="108" Height="38" Stretch="Uniform" VerticalAlignment="Center" />
