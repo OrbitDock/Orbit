@@ -12,11 +12,9 @@ public partial class MainWindow : Window
     private const uint ModAlt = 0x0001;
     private const uint ModControl = 0x0002;
     private const uint WmHotkey = 0x0312;
-    private const int GwlpWndProc = -4;
     private readonly WndProc _windowProc;
     private readonly Dictionary<string, Window> _openWindows = new();
-    private IntPtr _handle;
-    private IntPtr _previousWndProc;
+    private IntPtr _hotkeyWindow;
     private bool _hotkeyRegistered;
 
     public MainWindow()
@@ -37,33 +35,51 @@ public partial class MainWindow : Window
                 screen.WorkingArea.Y + (int)(24 * scale));
         }
 
-        var platformHandle = TryGetPlatformHandle();
-        if (platformHandle is null || !OperatingSystem.IsWindows())
+        if (!OperatingSystem.IsWindows())
             return;
 
-        _handle = platformHandle.Handle;
-        Marshal.SetLastPInvokeError(0);
-        _previousWndProc = SetWindowLongPtr(_handle, GwlpWndProc, Marshal.GetFunctionPointerForDelegate(_windowProc));
-        if (_previousWndProc == IntPtr.Zero && Marshal.GetLastPInvokeError() != 0)
-            return;
-
-        _hotkeyRegistered = RegisterHotKey(_handle, HotkeyId, ModControl | ModAlt, 0x4F);
-        if (!_hotkeyRegistered)
+        var windowClass = new WndClass
         {
-            SetWindowLongPtr(_handle, GwlpWndProc, _previousWndProc);
-            _previousWndProc = IntPtr.Zero;
+            WindowProcedure = Marshal.GetFunctionPointerForDelegate(_windowProc),
+            ClassName = "OrbitHotkeyWindow"
+        };
+        if (RegisterClass(ref windowClass) == 0)
+            return;
+
+        _hotkeyWindow = CreateWindowEx(0, windowClass.ClassName, string.Empty, 0, 0, 0, 0, 0, new IntPtr(-3), IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+        if (_hotkeyWindow == IntPtr.Zero)
+        {
+            UnregisterClass(windowClass.ClassName, IntPtr.Zero);
+            return;
         }
+
+        _hotkeyRegistered = RegisterHotKey(_hotkeyWindow, HotkeyId, ModControl | ModAlt, 0x4F);
     }
 
     private IntPtr WindowProcedure(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam)
     {
         if (message == WmHotkey && wParam.ToInt32() == HotkeyId)
         {
-            Avalonia.Threading.Dispatcher.UIThread.Post(() => IsVisible = !IsVisible);
+            Avalonia.Threading.Dispatcher.UIThread.Post(ToggleOverlay);
             return IntPtr.Zero;
         }
 
-        return CallWindowProc(_previousWndProc, hwnd, message, wParam, lParam);
+        return DefWindowProc(hwnd, message, wParam, lParam);
+    }
+
+    private void ToggleOverlay()
+    {
+        if (IsVisible)
+        {
+            Hide();
+            _openWindows.Values.LastOrDefault(window => window.IsVisible)?.Activate();
+            return;
+        }
+
+        Show();
+        Topmost = false;
+        Topmost = true;
+        Activate();
     }
 
     private void OnClipClick(object? sender, RoutedEventArgs e) => ToggleWindow("video-clipping", () => new InfoWindow("Video clipping", "This widget is not active yet."));
@@ -93,21 +109,37 @@ public partial class MainWindow : Window
                 _openWindows.Remove(key);
         };
         window.Show();
+        window.Activate();
     }
 
     public void DisposeHotkey()
     {
-        if (_handle == IntPtr.Zero)
+        if (_hotkeyWindow == IntPtr.Zero)
             return;
 
         if (_hotkeyRegistered)
-            UnregisterHotKey(_handle, HotkeyId);
-        if (_previousWndProc != IntPtr.Zero)
-            SetWindowLongPtr(_handle, GwlpWndProc, _previousWndProc);
-        _handle = IntPtr.Zero;
+            UnregisterHotKey(_hotkeyWindow, HotkeyId);
+        DestroyWindow(_hotkeyWindow);
+        UnregisterClass("OrbitHotkeyWindow", IntPtr.Zero);
+        _hotkeyWindow = IntPtr.Zero;
     }
 
     private delegate IntPtr WndProc(IntPtr hwnd, uint message, IntPtr wParam, IntPtr lParam);
+
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    private struct WndClass
+    {
+        public uint Style;
+        public IntPtr WindowProcedure;
+        public int ClassExtra;
+        public int WindowExtra;
+        public IntPtr Instance;
+        public IntPtr Icon;
+        public IntPtr Cursor;
+        public IntPtr Background;
+        public string? MenuName;
+        public string ClassName;
+    }
 
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool RegisterHotKey(IntPtr window, int id, uint modifiers, uint key);
@@ -115,9 +147,18 @@ public partial class MainWindow : Window
     [DllImport("user32.dll", SetLastError = true)]
     private static extern bool UnregisterHotKey(IntPtr window, int id);
 
-    [DllImport("user32.dll", EntryPoint = "SetWindowLongPtrW", SetLastError = true)]
-    private static extern IntPtr SetWindowLongPtr(IntPtr window, int index, IntPtr value);
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern ushort RegisterClass(ref WndClass windowClass);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern IntPtr CreateWindowEx(uint extendedStyle, string className, string windowName, uint style, int x, int y, int width, int height, IntPtr parent, IntPtr menu, IntPtr instance, IntPtr parameter);
+
+    [DllImport("user32.dll", SetLastError = true)]
+    private static extern bool DestroyWindow(IntPtr window);
+
+    [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern bool UnregisterClass(string className, IntPtr instance);
 
     [DllImport("user32.dll")]
-    private static extern IntPtr CallWindowProc(IntPtr previousProcedure, IntPtr window, uint message, IntPtr wParam, IntPtr lParam);
+    private static extern IntPtr DefWindowProc(IntPtr window, uint message, IntPtr wParam, IntPtr lParam);
 }
