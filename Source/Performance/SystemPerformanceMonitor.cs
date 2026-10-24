@@ -11,6 +11,8 @@ public sealed class SystemPerformanceMonitor : IDisposable
     private IntPtr _gpuCounter;
     private ulong? _previousCpuIdle;
     private ulong? _previousCpuTotal;
+    private ulong? _previousLinuxCpuIdle;
+    private ulong? _previousLinuxCpuTotal;
     private bool _gpuHasData;
     private bool _disposed;
 
@@ -36,7 +38,13 @@ public sealed class SystemPerformanceMonitor : IDisposable
             if (_disposed)
                 return new(null, null, null);
 
-            return new(ReadCpuUsage(), ReadMemory(), ReadGpuUsage());
+            if (OperatingSystem.IsLinux())
+                return new(ReadLinuxCpuUsage(), ReadLinuxMemory(), null);
+
+            if (OperatingSystem.IsWindows())
+                return new(ReadCpuUsage(), ReadMemory(), ReadGpuUsage());
+
+            return new(null, null, null);
         }
     }
 
@@ -74,6 +82,66 @@ public sealed class SystemPerformanceMonitor : IDisposable
         var totalDelta = total - previousTotal.Value;
         var idleDelta = Math.Min(idle - previousIdle.Value, totalDelta);
         return (totalDelta - idleDelta) * 100d / totalDelta;
+    }
+
+    private double? ReadLinuxCpuUsage()
+    {
+        try
+        {
+            var cpuLine = File.ReadLines("/proc/stat").FirstOrDefault(line => line.StartsWith("cpu "));
+            if (cpuLine is null)
+                return null;
+
+            var values = cpuLine.Split(' ', StringSplitOptions.RemoveEmptyEntries).Skip(1).Select(ulong.Parse).ToArray();
+            if (values.Length < 4)
+                return null;
+
+            var idle = values[3] + (values.Length > 4 ? values[4] : 0);
+            var total = values.Aggregate(0UL, (sum, value) => sum + value);
+            var previousIdle = _previousLinuxCpuIdle;
+            var previousTotal = _previousLinuxCpuTotal;
+            _previousLinuxCpuIdle = idle;
+            _previousLinuxCpuTotal = total;
+
+            if (previousIdle is null || previousTotal is null || total <= previousTotal.Value)
+                return null;
+
+            var totalDelta = total - previousTotal.Value;
+            var idleDelta = Math.Min(idle - previousIdle.Value, totalDelta);
+            return (totalDelta - idleDelta) * 100d / totalDelta;
+        }
+        catch (IOException)
+        {
+            return null;
+        }
+        catch (FormatException)
+        {
+            return null;
+        }
+    }
+
+    private static SystemMemorySnapshot? ReadLinuxMemory()
+    {
+        try
+        {
+            var memory = File.ReadLines("/proc/meminfo")
+                .Select(line => line.Split(':', 2))
+                .Where(parts => parts.Length == 2)
+                .ToDictionary(parts => parts[0], parts => ulong.Parse(parts[1].Trim().Split(' ')[0]) * 1024);
+
+            if (!memory.TryGetValue("MemTotal", out var total) || !memory.TryGetValue("MemAvailable", out var available))
+                return null;
+
+            return new(total, total - Math.Min(total, available));
+        }
+        catch (IOException)
+        {
+            return null;
+        }
+        catch (FormatException)
+        {
+            return null;
+        }
     }
 
     private static SystemMemorySnapshot? ReadMemory()
