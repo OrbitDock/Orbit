@@ -1,0 +1,35 @@
+# Licensed under Apache-2.0
+name: Builds
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    name: Build on Windows
+    runs-on: windows-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v5
+
+      - name: Install .NET 10 SDK
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Publish Orbit
+        run: dotnet publish Source/Orbit.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o artifacts/Orbit-windows-x64
+
+      - name: Upload Windows build
+        uses: actions/upload-artifact@v7
+        with:
+          name: Orbit-windows-x64
+          path: artifacts/
+          if-no-files-found: error
+          retention-days: 30
