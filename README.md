@@ -16,6 +16,8 @@
 
 Join Our [Discord Server](https://discord.gg/9XUcgqCj2h)!
 
+Check Out Our [Website](https://orbitdock.github.io)!
+
 ---
 
 [![Made With Kodo](https://raw.githubusercontent.com/Kodo-IDE/Kodo/main/made-with-kodo.svg)](https://github.com/Kodo-IDE/Kodo)
