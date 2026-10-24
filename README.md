@@ -18,11 +18,10 @@ Orbit is a unified gaming overlay, similar to a game bar, for many uses. The goa
 
 **Features:**
 
-- N / A
+- Drop down bar (Ctrl + Alt + O)
 
 **Planned Features:**
 
-- Drop down bar
 - Video Clipping
 - Game Screenshots (Organized, any game)
 - Discord Rich Presence
