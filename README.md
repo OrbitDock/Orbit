@@ -1,6 +1,6 @@
 # Orbit
 
-<img width="1024" height="512" alt="orbit_logo" src="https://github.com/user-attachments/assets/29c1772a-f887-4de0-9ffc-bdc357e0d8f2" />
+<img width="512" height="256" alt="orbit_logo" src="https://github.com/user-attachments/assets/29c1772a-f887-4de0-9ffc-bdc357e0d8f2" />
 
 [![Made With Kodo](https://raw.githubusercontent.com/Kodo-IDE/Kodo/main/made-with-kodo.svg)](https://github.com/Kodo-IDE/Kodo)
 
