@@ -7,10 +7,10 @@
       <SolidColorBrush x:Key="AccentBrush" Color="#2864F0" />
       <SolidColorBrush x:Key="CanvasBrush" Color="#202020" />
       <SolidColorBrush x:Key="RaisedBrush" Color="#303030" />
-      <SolidColorBrush x:Key="LineBrush" Color="#3D3D3D" />
+      <SolidColorBrush x:Key="LineBrush" Color="#414141" />
       <SolidColorBrush x:Key="TextBrush" Color="#F0F0F0" />
       <SolidColorBrush x:Key="MutedBrush" Color="#A6A6A6" />
-      <SolidColorBrush x:Key="IconBrush" Color="#A9B9DD" />
+      <SolidColorBrush x:Key="IconBrush" Color="#C4C4C4" />
     </ResourceDictionary>
   </Application.Resources>
 
@@ -26,14 +26,14 @@
       <Setter Property="BorderThickness" Value="0" />
       <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
       <Setter Property="Padding" Value="0" />
-      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="CornerRadius" Value="9" />
       <Setter Property="Cursor" Value="Hand" />
     </Style>
     <Style Selector="Button:pointerover">
       <Setter Property="Background" Value="{StaticResource RaisedBrush}" />
     </Style>
     <Style Selector="Button:pressed">
-      <Setter Property="Background" Value="#383838" />
+      <Setter Property="Background" Value="#393939" />
     </Style>
     <Style Selector="Button:focus-visible">
       <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />

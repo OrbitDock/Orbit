@@ -16,5 +16,6 @@
 
   <ItemGroup>
     <AvaloniaResource Include="..\Assets\orbit_logo_square.png" Link="Assets\orbit_logo_square.png" />
+    <AvaloniaResource Include="..\Assets\orbit_logo.png" Link="Assets\orbit_logo.png" />
   </ItemGroup>
 </Project>
