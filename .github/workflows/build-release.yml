@@ -1,41 +1,79 @@
 # Licensed under Apache-2.0
-name: Build Release
+          name: Build Release
 
-on:
-  workflow_dispatch:
+          on:
+            workflow_dispatch:
 
-permissions:
-  contents: read
+          permissions:
+            contents: read
 
-jobs:
-  windows:
-    name: Windows release
-    runs-on: windows-latest
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v5
+          jobs:
+            windows:
+              name: Windows release
+              runs-on: windows-latest
+              steps:
+                - name: Checkout source
+                  uses: actions/checkout@v5
 
-      - name: Install .NET 10 SDK
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: 10.0.x
+                - name: Install .NET 10 SDK
+                  uses: actions/setup-dotnet@v5
+                  with:
+                    dotnet-version: 10.0.x
 
-      - name: Publish Orbit
-        run: dotnet publish Source/Orbit.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o "$env:RUNNER_TEMP/orbit-publish"
+                - name: Publish Orbit
+                  run: dotnet publish Source/Orbit.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o "$env:RUNNER_TEMP/orbit-publish"
 
-      - name: Package and checksum
-        shell: pwsh
-        run: |
-          $out = "$env:RUNNER_TEMP/orbit-release"
-          New-Item -ItemType Directory -Force -Path $out | Out-Null
-          Compress-Archive -Path "$env:RUNNER_TEMP/orbit-publish/*" -DestinationPath "$out/Orbit-windows-x64.zip"
-          $hash = (Get-FileHash "$out/Orbit-windows-x64.zip" -Algorithm SHA256).Hash.ToLower()
-          "$hash  Orbit-windows-x64.zip" | Out-File -Encoding ascii "$out/Orbit-windows-x64.zip.sha256"
+                - name: Package and checksum
+                  shell: pwsh
+                  run: |
+                    $out = "$env:RUNNER_TEMP/orbit-release"
+                    New-Item -ItemType Directory -Force -Path $out | Out-Null
+                    Compress-Archive -Path "$env:RUNNER_TEMP/orbit-publish/*" -DestinationPath "$out/Orbit-windows-x64.zip"
+                    $hash = (Get-FileHash "$out/Orbit-windows-x64.zip" -Algorithm SHA256).Hash.ToLower()
+                    "$hash  Orbit-windows-x64.zip" | Out-File -Encoding ascii "$out/Orbit-windows-x64.zip.sha256"
 
-      - name: Upload Windows release
-        uses: actions/upload-artifact@v7
-        with:
-          name: Orbit-Windows-release
-          path: ${{ runner.temp }}/orbit-release/
-          if-no-files-found: error
-          retention-days: 30
+                - name: Upload Windows release
+                  uses: actions/upload-artifact@v7
+                  with:
+                    name: Orbit-Windows-release
+                    path: ${{ runner.temp }}/orbit-release/
+                    if-no-files-found: error
+                    retention-days: 30
+
+            linux:
+              name: Linux release
+              runs-on: ubuntu-24.04
+              steps:
+                - name: Checkout source
+                  uses: actions/checkout@v5
+
+                - name: Install .NET 10 SDK
+                  uses: actions/setup-dotnet@v5
+                  with:
+                    dotnet-version: 10.0.x
+
+                - name: Install Linux package dependencies
+                  run: |
+                    sudo apt-get update
+                    sudo apt-get install -y libicu-dev libssl-dev fontconfig
+
+                - name: Publish, package and checksum (x64 and ARM64)
+                  shell: bash
+                  run: |
+                    out="$RUNNER_TEMP/orbit-release"
+                    mkdir -p "$out"
+                    for rid in linux-x64 linux-arm64; do
+                      dotnet publish Source/Orbit.csproj -c Release -r "$rid" --self-contained true \
+                        -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true \
+                        -o "$RUNNER_TEMP/publish-$rid"
+                      tar -czf "$out/Orbit-$rid.tar.gz" -C "$RUNNER_TEMP/publish-$rid" .
+                    done
+                    cd "$out" && sha256sum *.tar.gz > SHA256SUMS
+
+                - name: Upload Linux release
+                  uses: actions/upload-artifact@v7
+                  with:
+                    name: Orbit-Linux-release
+                    path: ${{ runner.temp }}/orbit-release/
+                    if-no-files-found: error
+                    retention-days: 30

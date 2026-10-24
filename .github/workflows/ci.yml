@@ -1,35 +1,88 @@
 # Licensed under Apache-2.0
-name: Builds
+          name: Builds
 
-on:
-  push:
-    branches: [main, master]
-  pull_request:
-  workflow_dispatch:
+          on:
+            push:
+              branches: [main, master]
+            pull_request:
+            workflow_dispatch:
 
-permissions:
-  contents: read
+          permissions:
+            contents: read
 
-jobs:
-  windows:
-    name: Build on Windows
-    runs-on: windows-latest
-    steps:
-      - name: Checkout source
-        uses: actions/checkout@v5
+          jobs:
+            windows:
+              name: Build on Windows
+              runs-on: windows-latest
+              steps:
+                - name: Checkout source
+                  uses: actions/checkout@v5
 
-      - name: Install .NET 10 SDK
-        uses: actions/setup-dotnet@v5
-        with:
-          dotnet-version: 10.0.x
+                - name: Install .NET 10 SDK
+                  uses: actions/setup-dotnet@v5
+                  with:
+                    dotnet-version: 10.0.x
 
-      - name: Publish Orbit
-        run: dotnet publish Source/Orbit.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o artifacts/Orbit-windows-x64
+                - name: Publish Orbit
+                  run: dotnet publish Source/Orbit.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o artifacts/Orbit-windows-x64
 
-      - name: Upload Windows build
-        uses: actions/upload-artifact@v7
-        with:
-          name: Orbit-windows-x64
-          path: artifacts/
-          if-no-files-found: error
-          retention-days: 30
+                - name: Upload Windows build
+                  uses: actions/upload-artifact@v7
+                  with:
+                    name: Orbit-windows-x64
+                    path: artifacts/
+                    if-no-files-found: error
+                    retention-days: 30
+
+            linux:
+              name: Build on ${{ matrix.distro }}
+              runs-on: ubuntu-latest
+              container:
+                image: ${{ matrix.image }}
+              strategy:
+                fail-fast: false
+                matrix:
+                  include:
+                    - distro: Ubuntu 24.04 LTS
+                      id: ubuntu-24.04
+                      image: ubuntu:24.04
+                    - distro: Linux Mint 22
+                      id: linux-mint-22
+                      image: linuxmintd/mint22-amd64:latest
+                    - distro: Fedora 44
+                      id: fedora-44
+                      image: fedora:44
+              steps:
+                - name: Install native build dependencies
+                  shell: bash
+                  run: |
+                    if command -v apt-get >/dev/null; then
+                      apt-get update
+                      DEBIAN_FRONTEND=noninteractive apt-get install -y ca-certificates curl libicu-dev libssl-dev fontconfig
+                    else
+                      dnf install -y ca-certificates curl libicu openssl-libs fontconfig
+                    fi
+
+                - name: Checkout source
+                  uses: actions/checkout@v5
+
+                - name: Install .NET 10 SDK
+                  uses: actions/setup-dotnet@v5
+                  with:
+                    dotnet-version: 10.0.x
+
+                - name: Publish Orbit
+                  shell: bash
+                  run: dotnet publish Source/Orbit.csproj -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o "artifacts/Orbit-${{ matrix.id }}"
+
+                - name: Archive Linux build preserving executable permissions
+                  shell: bash
+                  run: tar -czf "Orbit-${{ matrix.id }}.tar.gz" -C artifacts .
+
+                - name: Upload Linux build
+                  uses: actions/upload-artifact@v7
+                  with:
+                    name: Orbit-${{ matrix.id }}
+                    path: Orbit-${{ matrix.id }}.tar.gz
+                    if-no-files-found: error
+                    retention-days: 30
