@@ -1,0 +1,53 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:icons="using:Orbit.Controls"
+        x:Class="Orbit.MainWindow"
+        Width="540" Height="76"
+        MinWidth="540" MaxWidth="540"
+        MinHeight="76" MaxHeight="76"
+        WindowDecorations="None"
+        TransparencyLevelHint="Transparent"
+        Background="Transparent"
+        CanResize="False"
+        ShowInTaskbar="False"
+        Topmost="True"
+        WindowStartupLocation="CenterScreen">
+  <Grid Margin="4">
+    <Border CornerRadius="34" BorderThickness="2" BorderBrush="{StaticResource AccentBrush}" Background="{StaticResource CanvasBrush}" IsHitTestVisible="False">
+      <Border.Effect>
+        <DropShadowEffect BlurRadius="10" Color="#99000000" Opacity="0.72" OffsetX="0" OffsetY="4" />
+      </Border.Effect>
+    </Border>
+    <Grid ColumnDefinitions="Auto,Auto,*,Auto,Auto" Margin="15,0,14,0">
+      <StackPanel Orientation="Horizontal" Spacing="9" VerticalAlignment="Center">
+        <Image Source="avares://Orbit/Assets/orbit_logo_square.png" Width="25" Height="25" />
+        <TextBlock Text="ORBIT" FontSize="12" FontWeight="Bold" Foreground="{StaticResource TextBrush}" VerticalAlignment="Center" />
+      </StackPanel>
+
+      <Border Grid.Column="1" Width="1" Height="30" Background="{StaticResource LineBrush}" Margin="16,0" />
+
+      <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+        <Button Width="42" Height="42" ToolTip.Tip="Video clipping" Click="OnClipClick" AutomationProperties.Name="Video clipping">
+          <icons:OrbitIcon Kind="Clip" Width="19" Height="19" Stroke="{StaticResource IconBrush}" />
+        </Button>
+        <Button Width="42" Height="42" ToolTip.Tip="Screenshots" Click="OnScreenshotClick" AutomationProperties.Name="Screenshots">
+          <icons:OrbitIcon Kind="Screenshot" Width="19" Height="19" Stroke="{StaticResource IconBrush}" />
+        </Button>
+        <Button Width="42" Height="42" ToolTip.Tip="PC performance" Click="OnPerformanceClick" AutomationProperties.Name="PC performance">
+          <icons:OrbitIcon Kind="Performance" Width="19" Height="19" Stroke="{StaticResource IconBrush}" />
+        </Button>
+      </StackPanel>
+
+      <Border Grid.Column="3" Width="1" Height="30" Background="{StaticResource LineBrush}" Margin="14,0" />
+
+      <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+        <Button Classes="primary" Width="42" Height="42" ToolTip.Tip="New widgets" Click="OnWidgetsClick" AutomationProperties.Name="New widgets">
+          <icons:OrbitIcon Kind="Add" Width="19" Height="19" Stroke="White" />
+        </Button>
+        <Button Width="42" Height="42" ToolTip.Tip="Settings" Click="OnSettingsClick" AutomationProperties.Name="Settings">
+          <icons:OrbitIcon Kind="Settings" Width="19" Height="19" Stroke="{StaticResource IconBrush}" />
+        </Button>
+      </StackPanel>
+    </Grid>
+  </Grid>
+</Window>

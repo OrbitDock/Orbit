@@ -1,0 +1,33 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:icons="using:Orbit.Controls"
+        x:Class="Orbit.SettingsWindowBase"
+        Width="460" Height="340"
+        MinWidth="460" MaxWidth="460"
+        MinHeight="340" MaxHeight="340"
+        WindowDecorations="None"
+        TransparencyLevelHint="Transparent"
+        Background="Transparent"
+        CanResize="False"
+        Topmost="True"
+        WindowStartupLocation="CenterScreen">
+  <Grid Margin="5">
+    <Border CornerRadius="18" BorderThickness="1" BorderBrush="{StaticResource LineBrush}" Background="{StaticResource CanvasBrush}" IsHitTestVisible="False">
+      <Border.Effect>
+        <DropShadowEffect BlurRadius="12" Color="#99000000" Opacity="0.7" OffsetX="0" OffsetY="5" />
+      </Border.Effect>
+    </Border>
+    <Grid RowDefinitions="58,*" Margin="18,12,18,16">
+      <Grid ColumnDefinitions="*,Auto" RowDefinitions="*,Auto">
+        <Border Background="Transparent" PointerPressed="OnTitleBarPointerPressed">
+          <TextBlock x:Name="TitleText" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" />
+        </Border>
+        <Button Grid.Column="1" Width="34" Height="34" ToolTip.Tip="Close" Click="OnCloseClick" AutomationProperties.Name="Close window">
+          <icons:OrbitIcon Kind="Close" Width="16" Height="16" Stroke="{StaticResource MutedBrush}" />
+        </Button>
+        <Border Grid.Row="1" Grid.ColumnSpan="2" Height="1" VerticalAlignment="Bottom" Background="{StaticResource LineBrush}" />
+      </Grid>
+      <ContentControl x:Name="Body" Grid.Row="1" Margin="2,20,2,0" />
+    </Grid>
+  </Grid>
+</Window>

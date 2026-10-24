@@ -1,0 +1,57 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Orbit.App"
+             RequestedThemeVariant="Dark">
+  <Application.Resources>
+    <ResourceDictionary>
+      <SolidColorBrush x:Key="AccentBrush" Color="#2864F0" />
+      <SolidColorBrush x:Key="CanvasBrush" Color="#17191E" />
+      <SolidColorBrush x:Key="RaisedBrush" Color="#272B34" />
+      <SolidColorBrush x:Key="LineBrush" Color="#343A46" />
+      <SolidColorBrush x:Key="TextBrush" Color="#F0F3F8" />
+      <SolidColorBrush x:Key="MutedBrush" Color="#A6AFBF" />
+      <SolidColorBrush x:Key="IconBrush" Color="#A9B9DD" />
+    </ResourceDictionary>
+  </Application.Resources>
+
+  <Application.Styles>
+    <FluentTheme />
+    <Style Selector="TextBlock">
+      <Setter Property="FontFamily" Value="Inter" />
+      <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+    </Style>
+    <Style Selector="Button">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button:pointerover">
+      <Setter Property="Background" Value="{StaticResource RaisedBrush}" />
+    </Style>
+    <Style Selector="Button:pressed">
+      <Setter Property="Background" Value="#303642" />
+    </Style>
+    <Style Selector="Button:focus-visible">
+      <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Button:disabled">
+      <Setter Property="Opacity" Value="0.45" />
+      <Setter Property="Cursor" Value="Arrow" />
+    </Style>
+    <Style Selector="Button.primary">
+      <Setter Property="Background" Value="{StaticResource AccentBrush}" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="Button.primary:pointerover">
+      <Setter Property="Background" Value="#3C72FF" />
+    </Style>
+    <Style Selector="Button.primary:pressed">
+      <Setter Property="Background" Value="#1E50D0" />
+    </Style>
+  </Application.Styles>
+</Application>
