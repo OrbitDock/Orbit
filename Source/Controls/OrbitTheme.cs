@@ -4,7 +4,7 @@ namespace Orbit.Controls;
 
 public static class OrbitTheme
 {
-    public static readonly IBrush Accent = Brush.Parse("#2864F0");
+    public static readonly IBrush Accent = Brush.Parse("#2060EA");
     public static readonly IBrush Surface = Brush.Parse("#292929");
     public static readonly IBrush Raised = Brush.Parse("#303030");
     public static readonly IBrush Line = Brush.Parse("#3D3D3D");
