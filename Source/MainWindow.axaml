@@ -20,7 +20,7 @@
 
       <Border Grid.Column="1" Width="1" Height="26" Background="{StaticResource LineBrush}" Margin="16,0" />
 
-      <Grid Grid.Column="2" ColumnDefinitions="40,40,40" Height="40" VerticalAlignment="Center" HorizontalAlignment="Left">
+      <Grid Grid.Column="2" ColumnDefinitions="40,40,40,40" Height="40" VerticalAlignment="Center" HorizontalAlignment="Left">
         <Button Grid.Column="0" Classes="overlay-icon-button" x:Name="ClipButton" ToolTip.Tip="Video clipping" Click="OnClipClick" AutomationProperties.Name="Video clipping">
           <Grid Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
             <icons:OrbitIcon Kind="Clip" Width="20" Height="20" Stroke="{StaticResource IconBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
@@ -36,6 +36,11 @@
             <icons:OrbitIcon Kind="Performance" Width="20" Height="20" Stroke="{StaticResource IconBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Grid>
         </Button>
+        <Button Grid.Column="3" Classes="overlay-icon-button" x:Name="MusicButton" ToolTip.Tip="Music" Click="OnMusicClick" AutomationProperties.Name="Music">
+          <Grid Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <icons:OrbitIcon Kind="Music" Width="20" Height="20" Stroke="{StaticResource IconBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Grid>
+        </Button>
       </Grid>
 
       <Border Grid.Column="3" Width="1" Height="26" Background="{StaticResource LineBrush}" Margin="18,0" />
@@ -43,7 +48,7 @@
       <Grid Grid.Column="4" ColumnDefinitions="40,40" Height="40" VerticalAlignment="Center">
         <Button Grid.Column="0" Classes="overlay-icon-button primary" ToolTip.Tip="New widgets" Click="OnWidgetsClick" AutomationProperties.Name="New widgets">
           <Grid Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
-            <icons:OrbitIcon Kind="Add" Width="18" Height="18" Stroke="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <icons:OrbitIcon Kind="Marketplace" Width="18" Height="18" Stroke="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Grid>
         </Button>
         <Button Grid.Column="1" Classes="overlay-icon-button" ToolTip.Tip="Settings" Click="OnSettingsClick" AutomationProperties.Name="Settings">

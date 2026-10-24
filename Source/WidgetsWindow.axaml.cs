@@ -15,6 +15,8 @@ public sealed class WidgetsWindow : SettingsWindowBase
         AddWidget(widgets, OrbitIconKind.Screenshot, "Screenshots", "Capture isn't available yet");
         AddDivider(widgets);
         AddWidget(widgets, OrbitIconKind.Performance, "PC performance", "Monitoring isn't active yet");
+        AddDivider(widgets);
+        AddWidget(widgets, OrbitIconKind.Music, "Music", "Control your music apps");
         widgets.Children.Add(new TextBlock
         {
             Text = "Widgets can't be added yet.",

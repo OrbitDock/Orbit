@@ -217,6 +217,7 @@ public partial class MainWindow : Window
     private void OnClipClick(object? sender, RoutedEventArgs e) => ToggleWindow("video-clipping", () => new InfoWindow("Video clipping", "This widget is not active yet."));
     private void OnScreenshotClick(object? sender, RoutedEventArgs e) => ToggleWindow("screenshots", () => new InfoWindow("Screenshots", "This widget is not active yet."));
     private void OnPerformanceClick(object? sender, RoutedEventArgs e) => ToggleWindow("performance", () => new PerformanceWindow());
+    private void OnMusicClick(object? sender, RoutedEventArgs e) => ToggleWindow("music", () => new InfoWindow("Music", "Music controls aren't available yet."));
     private void OnSettingsClick(object? sender, RoutedEventArgs e) => ToggleWindow("settings", () => new SettingsWindow());
     private void OnWidgetsClick(object? sender, RoutedEventArgs e) => ToggleWindow("widgets", () => new WidgetsWindow());
 
@@ -253,6 +254,7 @@ public partial class MainWindow : Window
             "video-clipping" => "ClipButton",
             "screenshots" => "ScreenshotButton",
             "performance" => "PerformanceButton",
+            "music" => "MusicButton",
             _ => null
         };
         if (buttonName is null || this.FindControl<Button>(buttonName) is not { } button)
