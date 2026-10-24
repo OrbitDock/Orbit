@@ -1,4 +1,4 @@
-<img width="922" height="572" alt="image" src="https://github.com/user-attachments/assets/02b230e5-efc5-4c00-b76c-0e78d23020bd" />
+<img width="512" height="256" alt="orbit_logo" src="https://github.com/user-attachments/assets/7c27c0c6-f4de-4e36-80a5-edbad734ae38" />
 
 ---
 
