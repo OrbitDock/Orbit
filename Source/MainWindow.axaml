@@ -25,13 +25,13 @@
 
       <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="3" VerticalAlignment="Center">
         <Button Width="40" Height="40" ToolTip.Tip="Video clipping" Click="OnClipClick" AutomationProperties.Name="Video clipping">
-          <icons:OrbitIcon Kind="Clip" Width="18" Height="18" Stroke="{StaticResource IconBrush}" />
+          <icons:OrbitIcon Kind="Clip" Width="20" Height="20" Stroke="{StaticResource IconBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" />
         </Button>
         <Button Width="40" Height="40" ToolTip.Tip="Screenshots" Click="OnScreenshotClick" AutomationProperties.Name="Screenshots">
-          <icons:OrbitIcon Kind="Screenshot" Width="18" Height="18" Stroke="{StaticResource IconBrush}" />
+          <icons:OrbitIcon Kind="Screenshot" Width="20" Height="20" Stroke="{StaticResource IconBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" />
         </Button>
         <Button Width="40" Height="40" ToolTip.Tip="PC performance" Click="OnPerformanceClick" AutomationProperties.Name="PC performance">
-          <icons:OrbitIcon Kind="Performance" Width="18" Height="18" Stroke="{StaticResource IconBrush}" />
+          <icons:OrbitIcon Kind="Performance" Width="20" Height="20" Stroke="{StaticResource IconBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" />
         </Button>
       </StackPanel>
 
