@@ -3,6 +3,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform;
+using Orbit.Controls;
 
 namespace Orbit;
 
@@ -109,9 +110,32 @@ public partial class MainWindow : Window
         {
             if (_openWindows.TryGetValue(key, out var openWindow) && ReferenceEquals(openWindow, window))
                 _openWindows.Remove(key);
+            SetWidgetButtonActive(key, false);
         };
         window.Show();
         window.Activate();
+        SetWidgetButtonActive(key, true);
+    }
+
+    private void SetWidgetButtonActive(string key, bool active)
+    {
+        var buttonName = key switch
+        {
+            "video-clipping" => "ClipButton",
+            "screenshots" => "ScreenshotButton",
+            "performance" => "PerformanceButton",
+            _ => null
+        };
+        if (buttonName is null || this.FindControl<Button>(buttonName) is not { } button)
+            return;
+
+        if (active)
+            button.Classes.Add("widget-active");
+        else
+            button.Classes.Remove("widget-active");
+
+        if (button.Content is OrbitIcon icon)
+            icon.Stroke = active ? OrbitTheme.Accent : OrbitTheme.Icon;
     }
 
     public void DisposeHotkey()

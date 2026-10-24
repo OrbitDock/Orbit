@@ -35,6 +35,11 @@
     <Style Selector="Button:pressed">
       <Setter Property="Background" Value="#393939" />
     </Style>
+    <Style Selector="Button.widget-active">
+      <Setter Property="Background" Value="#332060EA" />
+      <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
     <Style Selector="Button:focus-visible">
       <Setter Property="BorderBrush" Value="{StaticResource AccentBrush}" />
       <Setter Property="BorderThickness" Value="1" />
