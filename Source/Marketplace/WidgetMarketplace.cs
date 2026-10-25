@@ -149,7 +149,8 @@ public sealed class WidgetMarketplace
             ?? throw new InvalidDataException($"{widget.Name} manifest is invalid.");
         var assemblyPath = ValidatePackageFile(directory, manifest.Assembly);
         var loadContext = new WidgetLoadContext(_widgetsDirectory);
-        var assembly = loadContext.LoadFromAssemblyPath(assemblyPath);
+        using var assemblyStream = File.OpenRead(assemblyPath);
+        var assembly = loadContext.LoadFromStream(assemblyStream);
         var type = assembly.GetType(manifest.EntryPoint, throwOnError: true)!;
         if (Activator.CreateInstance(type) is not IOrbitWidget instance)
             throw new InvalidDataException($"{manifest.EntryPoint} must implement IOrbitWidget.");
@@ -219,7 +220,10 @@ public sealed class WidgetMarketplace
             foreach (var path in Directory.Exists(widgetsDirectory)
                 ? Directory.EnumerateFiles(widgetsDirectory, assemblyName.Name + ".dll", SearchOption.AllDirectories)
                 : Array.Empty<string>())
-                return LoadFromAssemblyPath(path);
+            {
+                using var stream = File.OpenRead(path);
+                return LoadFromStream(stream);
+            }
 
             return null;
         }
