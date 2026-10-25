@@ -91,6 +91,8 @@ public sealed class MarketplaceWindow : SettingsWindowBase
             Background = OrbitTheme.Raised,
             BorderBrush = OrbitTheme.Line,
             BorderThickness = new Avalonia.Thickness(1),
+            HorizontalContentAlignment = HorizontalAlignment.Center,
+            VerticalContentAlignment = VerticalAlignment.Center,
             VerticalAlignment = VerticalAlignment.Center
         };
         button.Click += async (_, _) =>
