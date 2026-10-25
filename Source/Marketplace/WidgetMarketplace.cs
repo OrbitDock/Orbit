@@ -39,6 +39,12 @@ public sealed class WidgetMarketplace
         return manifest?.Version == widget.Version;
     }
 
+    public void Uninstall(MarketplaceWidget widget)
+    {
+        if (IsInstalled(widget))
+            Directory.Delete(GetInstallDirectory(widget.Id, widget.Version), true);
+    }
+
     public IReadOnlyList<MarketplaceWidget> GetInstalledWidgets()
     {
         if (!Directory.Exists(_widgetsDirectory))

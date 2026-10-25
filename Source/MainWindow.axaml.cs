@@ -223,7 +223,7 @@ public partial class MainWindow : Window
     private void OnPerformanceClick(object? sender, RoutedEventArgs e) => ToggleWindow("performance", () => new PerformanceWindow());
     private void OnMusicClick(object? sender, RoutedEventArgs e) => ToggleWindow("music", () => new MusicWindow());
     private void OnSettingsClick(object? sender, RoutedEventArgs e) => ToggleWindow("settings", () => new SettingsWindow());
-    private void OnWidgetsClick(object? sender, RoutedEventArgs e) => ToggleWindow("widgets", () => new MarketplaceWindow(OpenMarketplaceWidgetAsync, RefreshMarketplaceWidgetButtons));
+    private void OnWidgetsClick(object? sender, RoutedEventArgs e) => ToggleWindow("widgets", () => new MarketplaceWindow(OpenMarketplaceWidgetAsync, RefreshMarketplaceWidgetButtons, CloseMarketplaceWidget));
 
     private Task OpenMarketplaceWidgetAsync(MarketplaceWidget widget)
     {
@@ -235,6 +235,14 @@ public partial class MainWindow : Window
             return new MarketplaceWidgetWindow(widget.Name, content);
         });
         return Task.CompletedTask;
+    }
+
+    private void CloseMarketplaceWidget(MarketplaceWidget widget)
+    {
+        var key = $"marketplace:{widget.Id}";
+        if (_openWindows.TryGetValue(key, out var window))
+            window.Close();
+        _loadedMarketplaceWidgets.Remove(widget.Id);
     }
 
     private void RefreshMarketplaceWidgetButtons()

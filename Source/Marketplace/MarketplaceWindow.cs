@@ -10,6 +10,7 @@ public sealed class MarketplaceWindow : SettingsWindowBase
     private readonly WidgetMarketplace _marketplace = new();
     private readonly Func<MarketplaceWidget, Task> _openWidget;
     private readonly Action _widgetsChanged;
+    private readonly Action<MarketplaceWidget> _widgetUninstalling;
     private readonly StackPanel _widgets = new() { Spacing = 8 };
     private readonly TextBlock _status = new() { Text = "Loading marketplace...", FontSize = 12, Foreground = OrbitTheme.Muted };
     private readonly TextBox _search = new()
@@ -24,10 +25,11 @@ public sealed class MarketplaceWindow : SettingsWindowBase
     private MarketplaceIndex? _index;
     private Uri? _source;
 
-    public MarketplaceWindow(Func<MarketplaceWidget, Task> openWidget, Action widgetsChanged)
+    public MarketplaceWindow(Func<MarketplaceWidget, Task> openWidget, Action widgetsChanged, Action<MarketplaceWidget> widgetUninstalling)
     {
         _openWidget = openWidget;
         _widgetsChanged = widgetsChanged;
+        _widgetUninstalling = widgetUninstalling;
         SetContent("Marketplace", new ScrollViewer
         {
             VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
@@ -82,7 +84,7 @@ public sealed class MarketplaceWindow : SettingsWindowBase
     {
         var button = new Button
         {
-            Content = _marketplace.IsInstalled(widget) ? "Open" : "Install",
+            Content = _marketplace.IsInstalled(widget) ? "Uninstall" : "Install",
             MinWidth = 76,
             Padding = new Avalonia.Thickness(12, 7),
             Background = OrbitTheme.Raised,
@@ -94,7 +96,25 @@ public sealed class MarketplaceWindow : SettingsWindowBase
         {
             if (_marketplace.IsInstalled(widget))
             {
-                await _openWidget(widget);
+                button.IsEnabled = false;
+                button.Content = "Uninstalling";
+                try
+                {
+                    _widgetUninstalling(widget);
+                    _marketplace.Uninstall(widget);
+                    button.Content = "Install";
+                    _widgetsChanged();
+                    _status.Text = $"{widget.Name} uninstalled.";
+                }
+                catch (Exception ex)
+                {
+                    button.Content = "Retry uninstall";
+                    _status.Text = $"Could not uninstall {widget.Name}: {ex.Message}";
+                }
+                finally
+                {
+                    button.IsEnabled = true;
+                }
                 return;
             }
 
@@ -104,7 +124,7 @@ public sealed class MarketplaceWindow : SettingsWindowBase
             {
                 await _marketplace.InstallAsync(widget, index, source);
                 _widgetsChanged();
-                button.Content = "Open";
+                button.Content = "Uninstall";
                 _status.Text = $"{widget.Name} installed.";
                 await _openWidget(widget);
             }
