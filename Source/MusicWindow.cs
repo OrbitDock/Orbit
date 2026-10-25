@@ -301,11 +301,13 @@ public sealed class MusicWindow : SettingsWindowBase
             var sent = await SendPlatformCommandAsync(command, _session, _positionSlider.Value, _volumeSlider.Value, _shuffle, _repeat);
             if (!sent)
                 throw new InvalidOperationException("The player did not accept the playback command.");
-            if (OperatingSystem.IsWindows() && _activeWindowsSession is null && command == "play-pause")
+#if WINDOWS
+            if (_activeWindowsSession is null && command == "play-pause")
             {
                 _isPlaying = !_isPlaying;
                 UpdatePlayPauseIcon(_isPlaying ? OrbitIconKind.Pause : OrbitIconKind.Play);
             }
+#endif
             await Task.Delay(250);
             await RefreshSessionAsync();
         }
