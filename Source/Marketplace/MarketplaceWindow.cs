@@ -22,6 +22,17 @@ public sealed class MarketplaceWindow : SettingsWindowBase
         BorderBrush = OrbitTheme.Line,
         BorderThickness = new Avalonia.Thickness(1)
     };
+    private readonly Button _refresh = new()
+    {
+        Content = "Refresh",
+        MinHeight = 36,
+        Padding = new Avalonia.Thickness(12, 7),
+        Background = OrbitTheme.Raised,
+        BorderBrush = OrbitTheme.Line,
+        BorderThickness = new Avalonia.Thickness(1),
+        HorizontalContentAlignment = HorizontalAlignment.Center,
+        VerticalContentAlignment = VerticalAlignment.Center
+    };
     private MarketplaceIndex? _index;
     private Uri? _source;
 
@@ -31,13 +42,44 @@ public sealed class MarketplaceWindow : SettingsWindowBase
         _openWidget = openWidget;
         _widgetsChanged = widgetsChanged;
         _widgetUninstalling = widgetUninstalling;
+        var searchRow = new Grid
+        {
+            ColumnDefinitions = new ColumnDefinitions("*,Auto"),
+            ColumnSpacing = 8,
+            Children = { _search, InColumn(_refresh, 1) }
+        };
         SetContent("Marketplace", new ScrollViewer
         {
             VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
-            Content = new StackPanel { Spacing = 12, Children = { _status, _search, _widgets } }
+            Content = new StackPanel { Spacing = 12, Children = { _status, searchRow, _widgets } }
         });
         _search.TextChanged += (_, _) => RenderWidgets();
+        _refresh.Click += async (_, _) => await RefreshMarketplaceAsync();
         Opened += async (_, _) => await LoadMarketplaceAsync();
+    }
+
+    private async Task RefreshMarketplaceAsync()
+    {
+        _refresh.IsEnabled = false;
+        _refresh.Content = "Refreshing";
+        _status.Text = "Refreshing marketplace index...";
+        try
+        {
+            var (index, source) = await _marketplace.RefreshIndexAsync();
+            _index = index;
+            _source = source;
+            RenderWidgets();
+            _status.Text = index.Widgets.Count == 0 ? "No widgets are listed in this index." : "Marketplace index refreshed.";
+        }
+        catch (Exception ex)
+        {
+            _status.Text = $"Could not refresh marketplace: {ex.Message}";
+        }
+        finally
+        {
+            _refresh.Content = "Refresh";
+            _refresh.IsEnabled = true;
+        }
     }
 
     private async Task LoadMarketplaceAsync()
