@@ -20,28 +20,28 @@
 
       <Border Grid.Column="1" Width="1" Height="26" Background="{StaticResource LineBrush}" Margin="16,0" />
 
-      <Grid Grid.Column="2" ColumnDefinitions="40,40,40,40" Height="40" VerticalAlignment="Center" HorizontalAlignment="Left">
-        <Button Grid.Column="0" Classes="overlay-icon-button" x:Name="ClipButton" ToolTip.Tip="Video clipping" Click="OnClipClick" AutomationProperties.Name="Video clipping">
+      <StackPanel Grid.Column="2" x:Name="WidgetButtons" Orientation="Horizontal" Height="40" VerticalAlignment="Center" HorizontalAlignment="Left">
+        <Button Classes="overlay-icon-button" x:Name="ClipButton" ToolTip.Tip="Video clipping" Click="OnClipClick" AutomationProperties.Name="Video clipping">
           <Grid Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
             <icons:OrbitIcon Kind="Clip" Width="20" Height="20" Stroke="{StaticResource IconBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Grid>
         </Button>
-        <Button Grid.Column="1" Classes="overlay-icon-button" x:Name="ScreenshotButton" ToolTip.Tip="Screenshots" Click="OnScreenshotClick" AutomationProperties.Name="Screenshots">
+        <Button Classes="overlay-icon-button" x:Name="ScreenshotButton" ToolTip.Tip="Screenshots" Click="OnScreenshotClick" AutomationProperties.Name="Screenshots">
           <Grid Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
             <icons:OrbitIcon Kind="Screenshot" Width="20" Height="20" Stroke="{StaticResource IconBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Grid>
         </Button>
-        <Button Grid.Column="2" Classes="overlay-icon-button" x:Name="PerformanceButton" ToolTip.Tip="PC performance" Click="OnPerformanceClick" AutomationProperties.Name="PC performance">
+        <Button Classes="overlay-icon-button" x:Name="PerformanceButton" ToolTip.Tip="PC performance" Click="OnPerformanceClick" AutomationProperties.Name="PC performance">
           <Grid Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
             <icons:OrbitIcon Kind="Performance" Width="20" Height="20" Stroke="{StaticResource IconBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Grid>
         </Button>
-        <Button Grid.Column="3" Classes="overlay-icon-button" x:Name="MusicButton" ToolTip.Tip="Music" Click="OnMusicClick" AutomationProperties.Name="Music">
+        <Button Classes="overlay-icon-button" x:Name="MusicButton" ToolTip.Tip="Music" Click="OnMusicClick" AutomationProperties.Name="Music">
           <Grid Width="24" Height="24" HorizontalAlignment="Center" VerticalAlignment="Center">
             <icons:OrbitIcon Kind="Music" Width="20" Height="20" Stroke="{StaticResource IconBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Grid>
         </Button>
-      </Grid>
+      </StackPanel>
 
       <Border Grid.Column="3" Width="1" Height="26" Background="{StaticResource LineBrush}" Margin="18,0" />
 

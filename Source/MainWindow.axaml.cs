@@ -6,6 +6,7 @@ using Avalonia.Interactivity;
 using Avalonia.Media;
 using Avalonia.Platform;
 using Orbit.Controls;
+using Orbit.Marketplace;
 
 namespace Orbit;
 
@@ -15,6 +16,8 @@ public partial class MainWindow : Window
     private const uint WmHotkey = 0x0312;
     private readonly WndProc _windowProc;
     private readonly Dictionary<string, Window> _openWindows = new();
+    private readonly Dictionary<string, WidgetMarketplace.LoadedWidget> _loadedMarketplaceWidgets = new();
+    private readonly WidgetMarketplace _widgetMarketplace = new();
     private readonly bool _hasSavedPosition;
     private IntPtr _hotkeyWindow;
     private bool _hotkeyRegistered;
@@ -35,6 +38,7 @@ public partial class MainWindow : Window
         _windowProc = WindowProcedure;
         _keyboardHookProc = KeyboardHookProcedure;
         Opened += OnOpened;
+        Opened += (_, _) => RefreshMarketplaceWidgetButtons();
         OrbitHotkey.Changed += UpdateHotkey;
     }
 
@@ -219,7 +223,45 @@ public partial class MainWindow : Window
     private void OnPerformanceClick(object? sender, RoutedEventArgs e) => ToggleWindow("performance", () => new PerformanceWindow());
     private void OnMusicClick(object? sender, RoutedEventArgs e) => ToggleWindow("music", () => new MusicWindow());
     private void OnSettingsClick(object? sender, RoutedEventArgs e) => ToggleWindow("settings", () => new SettingsWindow());
-    private void OnWidgetsClick(object? sender, RoutedEventArgs e) => ToggleWindow("widgets", () => new WidgetsWindow());
+    private void OnWidgetsClick(object? sender, RoutedEventArgs e) => ToggleWindow("widgets", () => new MarketplaceWindow(OpenMarketplaceWidgetAsync, RefreshMarketplaceWidgetButtons));
+
+    private Task OpenMarketplaceWidgetAsync(MarketplaceWidget widget)
+    {
+        ToggleWindow($"marketplace:{widget.Id}", () =>
+        {
+            var loaded = _widgetMarketplace.Load(widget);
+            var content = loaded.Instance.CreateView();
+            _loadedMarketplaceWidgets[widget.Id] = loaded;
+            return new MarketplaceWidgetWindow(widget.Name, content);
+        });
+        return Task.CompletedTask;
+    }
+
+    private void RefreshMarketplaceWidgetButtons()
+    {
+        if (this.FindControl<StackPanel>("WidgetButtons") is not { } panel)
+            return;
+
+        foreach (var oldButton in panel.Children.OfType<Button>().Where(button => button.Tag is string).ToArray())
+            panel.Children.Remove(oldButton);
+
+        foreach (var widget in _widgetMarketplace.GetInstalledWidgets())
+        {
+            var key = $"marketplace:{widget.Id}";
+            var iconKind = Enum.TryParse<OrbitIconKind>(widget.Icon, true, out var parsedIcon)
+                ? parsedIcon
+                : widget.Id == "orbit.weather" ? OrbitIconKind.Weather : OrbitIconKind.Marketplace;
+            var button = new Button
+            {
+                Tag = key,
+                Classes = { "overlay-icon-button" },
+                Content = new OrbitIcon(iconKind) { Width = 20, Height = 20, Stroke = OrbitTheme.Icon, HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center, VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center }
+            };
+            ToolTip.SetTip(button, widget.Name);
+            button.Click += async (_, _) => await OpenMarketplaceWidgetAsync(widget);
+            panel.Children.Add(button);
+        }
+    }
 
     private void ToggleWindow(string key, Func<Window> createWindow)
     {
@@ -257,7 +299,10 @@ public partial class MainWindow : Window
             "music" => "MusicButton",
             _ => null
         };
-        if (buttonName is null || this.FindControl<Button>(buttonName) is not { } button)
+        var button = buttonName is null
+            ? this.FindControl<StackPanel>("WidgetButtons")?.Children.OfType<Button>().FirstOrDefault(item => item.Tag as string == key)
+            : this.FindControl<Button>(buttonName);
+        if (button is null)
             return;
 
         if (active)
