@@ -11,7 +11,14 @@ public enum OrbitIconKind
     Marketplace,
     Music,
     Settings,
-    Close
+    Close,
+    Previous,
+    Next,
+    Play,
+    Pause,
+    Shuffle,
+    Repeat,
+    Volume
 }
 
 public sealed class OrbitIcon : Avalonia.Controls.Shapes.Path
@@ -24,7 +31,14 @@ public sealed class OrbitIcon : Avalonia.Controls.Shapes.Path
         [OrbitIconKind.Marketplace] = "M3 9 L5 4 H19 L21 9 M4 9 V20 H20 V9 M4 9 C4 12 8 12 8 9 C8 12 12 12 12 9 C12 12 16 12 16 9 C16 12 20 12 20 9 M9 20 V15 H15 V20",
         [OrbitIconKind.Music] = "M12 5 V15.5 M21 3 V13.5 M12 5 L21 3 M12 15.5 C12 17.2 10.4 18.6 8.2 18.6 C6 18.6 4.5 17.4 4.5 15.8 C4.5 14.2 6.2 12.8 8.3 12.8 C10.4 12.8 12 14 12 15.5 Z M21 13.5 C21 15.2 19.4 16.6 17.2 16.6 C15 16.6 13.5 15.4 13.5 13.8 C13.5 12.2 15.2 10.8 17.3 10.8 C19.4 10.8 21 12 21 13.5 Z",
         [OrbitIconKind.Settings] = "M4 6 H20 M4 12 H20 M4 18 H20 M9 4 V8 M15 10 V14 M8 16 V20",
-        [OrbitIconKind.Close] = "M6 6 L18 18 M18 6 L6 18"
+        [OrbitIconKind.Close] = "M6 6 L18 18 M18 6 L6 18",
+        [OrbitIconKind.Previous] = "M6 5 V19 M19 6 L8 12 L19 18 Z",
+        [OrbitIconKind.Next] = "M18 5 V19 M5 6 L16 12 L5 18 Z",
+        [OrbitIconKind.Play] = "M7 4 L20 12 L7 20 Z",
+        [OrbitIconKind.Pause] = "M7 5 V19 M17 5 V19",
+        [OrbitIconKind.Shuffle] = "M16 3 H21 V8 M4 20 L21 3 M21 16 V21 H16 M15 15 L21 21 M4 4 L9 9",
+        [OrbitIconKind.Repeat] = "M17 2 L21 6 L17 10 M3 11 V9 A3 3 0 0 1 6 6 H21 M7 22 L3 18 L7 14 M21 13 V15 A3 3 0 0 1 18 18 H3",
+        [OrbitIconKind.Volume] = "M3 9 V15 H7 L12 19 V5 L7 9 Z M16 9 A5 5 0 0 1 16 15 M18 6 A9 9 0 0 1 18 18"
     };
 
     private OrbitIconKind _kind;
