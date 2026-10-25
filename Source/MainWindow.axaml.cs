@@ -40,6 +40,18 @@ public partial class MainWindow : Window
         Opened += OnOpened;
         Opened += (_, _) => RefreshMarketplaceWidgetButtons();
         OrbitHotkey.Changed += UpdateHotkey;
+        _ = WarmMarketplaceIndexAsync();
+    }
+
+    private async Task WarmMarketplaceIndexAsync()
+    {
+        try
+        {
+            await _widgetMarketplace.LoadIndexAsync();
+        }
+        catch
+        {
+        }
     }
 
     private void OnOpened(object? sender, EventArgs e)
@@ -223,7 +235,7 @@ public partial class MainWindow : Window
     private void OnPerformanceClick(object? sender, RoutedEventArgs e) => ToggleWindow("performance", () => new PerformanceWindow());
     private void OnMusicClick(object? sender, RoutedEventArgs e) => ToggleWindow("music", () => new MusicWindow());
     private void OnSettingsClick(object? sender, RoutedEventArgs e) => ToggleWindow("settings", () => new SettingsWindow());
-    private void OnWidgetsClick(object? sender, RoutedEventArgs e) => ToggleWindow("widgets", () => new MarketplaceWindow(OpenMarketplaceWidgetAsync, RefreshMarketplaceWidgetButtons, CloseMarketplaceWidget));
+    private void OnWidgetsClick(object? sender, RoutedEventArgs e) => ToggleWindow("widgets", () => new MarketplaceWindow(_widgetMarketplace, OpenMarketplaceWidgetAsync, RefreshMarketplaceWidgetButtons, CloseMarketplaceWidget));
 
     private Task OpenMarketplaceWidgetAsync(MarketplaceWidget widget)
     {

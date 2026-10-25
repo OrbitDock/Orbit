@@ -11,22 +11,42 @@ public sealed class WidgetMarketplace
     private static readonly JsonSerializerOptions JsonOptions = new() { PropertyNameCaseInsensitive = true };
     private readonly string _widgetsDirectory = Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Orbit", "Widgets");
+    private readonly string _indexCachePath = Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Orbit", "Marketplace", "Widget_Index.json");
+    private Task<(MarketplaceIndex Index, Uri Source)>? _indexTask;
 
     public const string DefaultIndexLocation = "https://raw.githubusercontent.com/orbitdock/Orbit-Widgets/main/Indexes/Widget_Index.json";
 
-    public async Task<(MarketplaceIndex Index, Uri Source)> LoadIndexAsync()
+    public Task<(MarketplaceIndex Index, Uri Source)> LoadIndexAsync()
+    {
+        return _indexTask ??= FetchIndexAsync();
+    }
+
+    private async Task<(MarketplaceIndex Index, Uri Source)> FetchIndexAsync()
     {
         var sourceText = DefaultIndexLocation;
         var source = Uri.TryCreate(sourceText, UriKind.Absolute, out var parsed) && parsed.IsAbsoluteUri
             ? parsed
             : new Uri(Path.GetFullPath(sourceText));
-        var json = source.IsFile
-            ? await File.ReadAllTextAsync(source.LocalPath)
-            : await Client.GetStringAsync(source);
-        var index = JsonSerializer.Deserialize<MarketplaceIndex>(json, JsonOptions)
-            ?? throw new InvalidDataException("The marketplace index is empty or invalid.");
-        return (index, source);
+        try
+        {
+            var json = source.IsFile
+                ? await File.ReadAllTextAsync(source.LocalPath)
+                : await Client.GetStringAsync(source);
+            var index = DeserializeIndex(json);
+            Directory.CreateDirectory(Path.GetDirectoryName(_indexCachePath)!);
+            await File.WriteAllTextAsync(_indexCachePath, json);
+            return (index, source);
+        }
+        catch when (File.Exists(_indexCachePath))
+        {
+            var cachedIndex = DeserializeIndex(await File.ReadAllTextAsync(_indexCachePath));
+            return (cachedIndex, source);
+        }
     }
+
+    private MarketplaceIndex DeserializeIndex(string json) => JsonSerializer.Deserialize<MarketplaceIndex>(json, JsonOptions)
+        ?? throw new InvalidDataException("The marketplace index is empty or invalid.");
 
     public bool IsInstalled(MarketplaceWidget widget)
     {

@@ -7,7 +7,7 @@ namespace Orbit.Marketplace;
 
 public sealed class MarketplaceWindow : SettingsWindowBase
 {
-    private readonly WidgetMarketplace _marketplace = new();
+    private readonly WidgetMarketplace _marketplace;
     private readonly Func<MarketplaceWidget, Task> _openWidget;
     private readonly Action _widgetsChanged;
     private readonly Action<MarketplaceWidget> _widgetUninstalling;
@@ -25,8 +25,9 @@ public sealed class MarketplaceWindow : SettingsWindowBase
     private MarketplaceIndex? _index;
     private Uri? _source;
 
-    public MarketplaceWindow(Func<MarketplaceWidget, Task> openWidget, Action widgetsChanged, Action<MarketplaceWidget> widgetUninstalling)
+    public MarketplaceWindow(WidgetMarketplace marketplace, Func<MarketplaceWidget, Task> openWidget, Action widgetsChanged, Action<MarketplaceWidget> widgetUninstalling)
     {
+        _marketplace = marketplace;
         _openWidget = openWidget;
         _widgetsChanged = widgetsChanged;
         _widgetUninstalling = widgetUninstalling;
