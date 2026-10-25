@@ -44,6 +44,7 @@ public sealed class MusicWindow : SettingsWindowBase
     private string? _loadedArtworkKey;
     private string? _artworkTrackKey;
     private bool _isPlaying;
+    private DateTime _optimisticPlaybackUntil;
     private bool _busy;
     private bool _updatingControls;
     private bool _shuffle;
@@ -73,7 +74,7 @@ public sealed class MusicWindow : SettingsWindowBase
         _durationText = new TextBlock { Text = "0:00", FontSize = 10, Foreground = OrbitTheme.Muted, VerticalAlignment = VerticalAlignment.Center, HorizontalAlignment = HorizontalAlignment.Right };
 
         previous.Click += async (_, _) => await SendCommandAsync("previous");
-        _playPauseButton.Click += async (_, _) => await SendCommandAsync("play-pause");
+        _playPauseButton.Click += async (_, _) => await TogglePlayPauseAsync();
         next.Click += async (_, _) => await SendCommandAsync("next");
 
         _shuffleButton.Click += async (_, _) => await SendCommandAsync("shuffle");
@@ -159,7 +160,27 @@ public sealed class MusicWindow : SettingsWindowBase
     {
         var button = new Button
         {
-            Content = new OrbitIcon(iconKind) { Width = 18, Height = 18, Stroke = OrbitTheme.Text },
+            Content = new Grid
+            {
+                Width = 24,
+                Height = 24,
+                HorizontalAlignment = HorizontalAlignment.Center,
+                VerticalAlignment = VerticalAlignment.Center,
+                Children =
+                {
+                    new OrbitIcon(iconKind)
+                    {
+                        Width = 18,
+                        Height = 18,
+                        Margin = iconKind is OrbitIconKind.Play or OrbitIconKind.Pause
+                            ? new Avalonia.Thickness(4, 0, 0, 0)
+                            : new Avalonia.Thickness(0),
+                        Stroke = OrbitTheme.Text,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                        VerticalAlignment = VerticalAlignment.Center
+                    }
+                }
+            },
             Width = size,
             Height = size,
             Background = OrbitTheme.Raised,
@@ -190,7 +211,7 @@ public sealed class MusicWindow : SettingsWindowBase
             SetText(_trackText, session.Track);
             SetText(_artistText, session.Artist);
             SetText(_albumText, session.Album.Length > 0 ? $"{session.Album}{(session.TrackNumber > 0 ? $" · Track {session.TrackNumber}" : "")}" : session.TrackNumber > 0 ? $"Track {session.TrackNumber}" : "");
-            if (session.IsPlaying.HasValue)
+            if (session.IsPlaying.HasValue && DateTime.UtcNow >= _optimisticPlaybackUntil)
                 _isPlaying = session.IsPlaying.Value;
             var playPauseKind = _isPlaying ? OrbitIconKind.Pause : OrbitIconKind.Play;
             UpdatePlayPauseIcon(playPauseKind);
@@ -204,8 +225,8 @@ public sealed class MusicWindow : SettingsWindowBase
             _shuffle = session.Shuffle;
             _repeat = session.LoopStatus;
             _trackId = session.TrackId;
-            ((OrbitIcon)_shuffleButton.Content!).Stroke = _shuffle ? OrbitTheme.Accent : OrbitTheme.Text;
-            ((OrbitIcon)_repeatButton.Content!).Stroke = _repeat != "None" ? OrbitTheme.Accent : OrbitTheme.Text;
+            GetButtonIcon(_shuffleButton).Stroke = _shuffle ? OrbitTheme.Accent : OrbitTheme.Text;
+            GetButtonIcon(_repeatButton).Stroke = _repeat != "None" ? OrbitTheme.Accent : OrbitTheme.Text;
             _updatingControls = true;
             _positionSlider.Maximum = Math.Max(session.DurationMs, 1);
             _positionSlider.Value = Math.Clamp(session.PositionMs, 0, Math.Max(session.DurationMs, 1));
@@ -253,12 +274,14 @@ public sealed class MusicWindow : SettingsWindowBase
 
     private void UpdatePlayPauseIcon(OrbitIconKind kind)
     {
-        var icon = (OrbitIcon)_playPauseButton.Content!;
+        var icon = GetButtonIcon(_playPauseButton);
         if (icon.Kind != kind)
             icon.Kind = kind;
         icon.Fill = Brushes.Transparent;
         icon.Stroke = OrbitTheme.Text;
     }
+
+    private static OrbitIcon GetButtonIcon(Button button) => (OrbitIcon)((Grid)button.Content!).Children[0]!;
 
     private async Task LoadArtworkAsync(string? url, byte[]? artwork = null)
     {
@@ -301,17 +324,18 @@ public sealed class MusicWindow : SettingsWindowBase
             var sent = await SendPlatformCommandAsync(command, _session, _positionSlider.Value, _volumeSlider.Value, _shuffle, _repeat);
             if (!sent)
                 throw new InvalidOperationException("The player did not accept the playback command.");
-#if WINDOWS
-            if (_activeWindowsSession is null && command == "play-pause")
-            {
-                _isPlaying = !_isPlaying;
-                UpdatePlayPauseIcon(_isPlaying ? OrbitIconKind.Pause : OrbitIconKind.Play);
-            }
-#endif
             await Task.Delay(250);
             await RefreshSessionAsync();
         }
         catch (Exception ex) { _statusText.Text = $"Could not control the player: {ex.Message}"; }
+    }
+
+    private async Task TogglePlayPauseAsync()
+    {
+        _isPlaying = !_isPlaying;
+        _optimisticPlaybackUntil = DateTime.UtcNow.AddSeconds(2);
+        UpdatePlayPauseIcon(_isPlaying ? OrbitIconKind.Pause : OrbitIconKind.Play);
+        await SendCommandAsync("play-pause");
     }
 
     private static async Task<MediaSession> ReadSessionAsync() => OperatingSystem.IsWindows() ? await ReadWindowsSessionAsync() : await Task.Run(ReadLinuxSession);

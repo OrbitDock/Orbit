@@ -34,8 +34,8 @@ public sealed class OrbitIcon : Avalonia.Controls.Shapes.Path
         [OrbitIconKind.Close] = "M6 6 L18 18 M18 6 L6 18",
         [OrbitIconKind.Previous] = "M6 5 V19 M19 6 L8 12 L19 18 Z",
         [OrbitIconKind.Next] = "M18 5 V19 M5 6 L16 12 L5 18 Z",
-        [OrbitIconKind.Play] = "M7 4 L20 12 L7 20 Z",
-        [OrbitIconKind.Pause] = "M7 5 V19 M17 5 V19",
+        [OrbitIconKind.Play] = "M9 5 L19 12 L9 19 Z",
+        [OrbitIconKind.Pause] = "M8 5 V19 M18 5 V19",
         [OrbitIconKind.Shuffle] = "M16 3 H21 V8 M4 20 L21 3 M21 16 V21 H16 M15 15 L21 21 M4 4 L9 9",
         [OrbitIconKind.Repeat] = "M17 2 L21 6 L17 10 M3 11 V9 A3 3 0 0 1 6 6 H21 M7 22 L3 18 L7 14 M21 13 V15 A3 3 0 0 1 18 18 H3",
         [OrbitIconKind.Volume] = "M3 9 V15 H7 L12 19 V5 L7 9 Z M16 9 A5 5 0 0 1 16 15 M18 6 A9 9 0 0 1 18 18"
