@@ -12,6 +12,17 @@ public sealed class MarketplaceWindow : SettingsWindowBase
     private readonly Action _widgetsChanged;
     private readonly StackPanel _widgets = new() { Spacing = 8 };
     private readonly TextBlock _status = new() { Text = "Loading marketplace...", FontSize = 12, Foreground = OrbitTheme.Muted };
+    private readonly TextBox _search = new()
+    {
+        PlaceholderText = "Search widgets",
+        MinHeight = 36,
+        Padding = new Avalonia.Thickness(10, 7),
+        Background = OrbitTheme.Raised,
+        BorderBrush = OrbitTheme.Line,
+        BorderThickness = new Avalonia.Thickness(1)
+    };
+    private MarketplaceIndex? _index;
+    private Uri? _source;
 
     public MarketplaceWindow(Func<MarketplaceWidget, Task> openWidget, Action widgetsChanged)
     {
@@ -20,8 +31,9 @@ public sealed class MarketplaceWindow : SettingsWindowBase
         SetContent("Marketplace", new ScrollViewer
         {
             VerticalScrollBarVisibility = Avalonia.Controls.Primitives.ScrollBarVisibility.Auto,
-            Content = new StackPanel { Spacing = 12, Children = { _status, _widgets } }
+            Content = new StackPanel { Spacing = 12, Children = { _status, _search, _widgets } }
         });
+        _search.TextChanged += (_, _) => RenderWidgets();
         Opened += async (_, _) => await LoadMarketplaceAsync();
     }
 
@@ -30,18 +42,40 @@ public sealed class MarketplaceWindow : SettingsWindowBase
         try
         {
             var (index, source) = await _marketplace.LoadIndexAsync();
-            _widgets.Children.Clear();
-            foreach (var widget in index.Widgets)
-            {
-                _widgets.Children.Add(CreateWidgetCard(widget, index, source));
-                _widgets.Children.Add(new Border { Height = 1, Background = OrbitTheme.Line, Margin = new Avalonia.Thickness(42, 0, 0, 0) });
-            }
+            _index = index;
+            _source = source;
+            RenderWidgets();
             _status.Text = index.Widgets.Count == 0 ? "No widgets are listed in this index." : "Install a widget or open one that is already installed.";
         }
         catch (Exception ex)
         {
             _status.Text = $"Marketplace unavailable: {ex.Message}";
         }
+    }
+
+    private void RenderWidgets()
+    {
+        _widgets.Children.Clear();
+        if (_index is null || _source is null)
+            return;
+
+        var query = _search.Text?.Trim();
+        var results = _index.Widgets.Where(widget => string.IsNullOrEmpty(query)
+            || widget.Name.Contains(query, StringComparison.OrdinalIgnoreCase)
+            || widget.Description.Contains(query, StringComparison.OrdinalIgnoreCase)
+            || widget.Author.Contains(query, StringComparison.OrdinalIgnoreCase)
+            || widget.Category.Contains(query, StringComparison.OrdinalIgnoreCase)
+            || widget.Tags.Any(tag => tag.Contains(query, StringComparison.OrdinalIgnoreCase))).ToArray();
+
+        for (var i = 0; i < results.Length; i++)
+        {
+            if (i > 0)
+                _widgets.Children.Add(new Border { Height = 1, Background = OrbitTheme.Line, Margin = new Avalonia.Thickness(42, 0, 0, 0) });
+            _widgets.Children.Add(CreateWidgetCard(results[i], _index, _source));
+        }
+
+        if (results.Length == 0)
+            _widgets.Children.Add(new TextBlock { Text = "No widgets match your search.", FontSize = 12, Foreground = OrbitTheme.Muted });
     }
 
     private Control CreateWidgetCard(MarketplaceWidget widget, MarketplaceIndex index, Uri source)
